@@ -1,0 +1,1147 @@
+<survey 
+     xmlns="http://www.openforis.org/idml/3.0"
+     xmlns:ui="http://www.openforis.org/collect/3.0/ui"
+     xmlns:collect="http://www.openforis.org/collect/3.0/collect"
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:schemaLocation="http://www.openforis.org/idml/3.0 https://raw.github.com/openforis/idm/reengineering/idm-api/src/main/resources/idml3.xsd">
+    <project>Ghana</project>
+    <cycle>1</cycle>
+    <description/>		
+    <configuration>
+        <flex xmlns="http://www.openforis.org/collect/3.0/ui">
+            <tabDefinition rootEntity="cluster">
+	        <tabs>
+	            <tab name="cluster">
+	                <label>Main</label>
+	            </tab>
+	            <tab name="plot">
+					<label>Plots</label>
+		            <tabs>		      
+						<label>Plots</label>					
+		                <tab name="plot_det">
+		                    <ui:label>Details</ui:label>
+		                </tab>
+						<tab name="land">
+		                    <label>Land</label>
+		                </tab>
+						<tab name="tally_tree">
+		                    <label>Tally trees</label>
+		                </tab>
+						<tab name="juvenile_tree">
+		                    <label>Juvenile trees</label>
+		                </tab>						
+						<tab name="seedling_shrub">
+		                    <label>Seedlings and shrubs</label>
+		                </tab>
+						<tab name="standing_dead_wood">
+		                    <label>Standing dead wood</label>
+		                </tab>
+						<tab name="dead_wood">
+		                    <label>Downed dead wood</label>
+		                </tab>
+						<tab name="non_tree_biomass">
+		                    <label>Non-tree biomass</label>
+		                </tab>
+						<tab name="litter">
+		                    <label>Litter</label>
+		                </tab>
+						<tab name="soil">
+		                    <label>Soil</label>
+		                </tab>
+	                </tabs>
+	            </tab>       	            
+	        </tabs>
+	        </tabDefinition>
+        </flex>
+    </configuration>
+	<versioning>
+		<version name="1.8">
+            <label>FORM 13.04.2012</label>
+            <description>Making form compatible with OpenForisCollect</description>
+            <date>2012-04-13</date>
+        </version>		
+    </versioning>
+	<codeLists>  
+		<list name="main_site_type">
+            <label type="list">Choose main site type</label>
+            <items>
+                <item>
+                    <code>0</code>
+                    <label>Mineral soil</label>
+                </item>
+                <item>
+                    <code>1</code>
+                    <label>Peat lands</label>
+                </item>
+                <item>
+                    <code>2</code>
+                    <label>Wetlands</label>
+                </item>
+            </items>
+        </list>	
+		<list name="ipcc_land_use">
+            <label type="list">Choose IPCC land use class</label>
+            <items>
+                <item>
+                    <code>0</code>
+                    <label>Forest Land</label>
+                </item>
+                <item>
+                    <code>1</code>
+                    <label>Cropland</label>
+                </item>
+                <item>
+                    <code>2</code>
+                    <label>Grassland</label>
+                </item>
+                <item>
+                    <code>3</code>
+                    <label>Settlements</label>
+                </item>
+                <item>
+                    <code>4</code>
+                    <label>Wetlands</label>
+                </item>
+                <item>
+                    <code>5</code>
+                    <label>Other Land</label>
+                </item>
+            </items>
+        </list>	
+		<list name="fao_land_use">
+            <label type="list">Choose FAO land use class</label>
+            <items>
+                <item>
+                    <code>0</code>
+                    <label>Forest land</label>
+                </item>
+                <item>
+                    <code>1</code>
+                    <label>Other wooded land</label>
+                </item>
+                <item>
+                    <code>2</code>
+                    <label>Agricultural land with tree cover</label>
+                </item>
+				<item>
+                    <code>3</code>
+                    <label>Agricultural land not fulfilling the forest criteria</label>
+                </item>
+				<item>
+                    <code>4</code>
+                    <label>Built-up land with tree cover</label>
+                </item>
+				<item>
+                    <code>5</code>
+                    <label>Built-up land not fulfilling the forest criteria</label>
+                </item>
+				<item>
+                    <code>6</code>
+                    <label>Other</label>
+                </item>				
+            </items>
+        </list>	
+		<list name="species_name">
+            <label type="list">Choose species code</label>
+             <items>
+                <item><code>0</code><label>Choose Local Name</label></item>
+<item><code>1589</code><label>(oBANAWA)_1589</label></item>
+<item><code>999</code><label>?_999</label></item>
+<item><code>147</code><label>ABABIMA_147</label></item>
+<item><code>276</code><label>ABe_276</label></item>
+<item><code>368</code><label>ABESEBUO_368</label></item>
+<item><code>2650</code><label>ABISAA_2650</label></item>
+<item><code>658</code><label>ABOBABEMA_658</label></item>
+<item><code>558</code><label>ABOBoNKAHYIRE_558</label></item>
+<item><code>142</code><label>ABOBONKAYERe_142</label></item>
+<item><code>571</code><label>ABOTESIMA_571</label></item>
+<item><code>572</code><label>ABOTESIMANUA_572</label></item>
+<item><code>502</code><label>ABOTOASEBIE_502</label></item>
+<item><code>170</code><label>ABRUMA_170</label></item>
+<item><code>454</code><label>ADADABA_454</label></item>
+<item><code>380</code><label>ADAFA_380</label></item>
+<item><code>158</code><label>ADASEMA_158</label></item>
+<item><code>536</code><label>ADOBe_536</label></item>
+<item><code>212</code><label>ADWEA_212</label></item>
+<item><code>488</code><label>AFAM_488</label></item>
+<item><code>414</code><label>AFAMBERE_414</label></item>
+<item><code>412</code><label>AFAMNINI_412</label></item>
+<item><code>52</code><label>AFENA_52</label></item>
+<item><code>384</code><label>AFENA-AKOA_384</label></item>
+<item><code>462</code><label>AFINAFI_462</label></item>
+<item><code>177</code><label>AFRAMDASA_177</label></item>
+<item><code>482</code><label>AFRAMSUA_482</label></item>
+<item><code>194</code><label>AFRA-NI-AFEI_194</label></item>
+<item><code>523</code><label>AGYAHERE_523</label></item>
+<item><code>522</code><label>AGYAHERENUA_522</label></item>
+<item><code>343</code><label>AGYAMERA_343</label></item>
+<item><code>238</code><label>AHENEBANSATEA_238</label></item>
+<item><code>464</code><label>AHOoHENEDUA_464</label></item>
+<item><code>278</code><label>AKANI_278</label></item>
+<item><code>150</code><label>AKASAA_150</label></item>
+<item><code>372</code><label>AKASOA-NINI_372</label></item>
+<item><code>119</code><label>AKATA_119</label></item>
+<item><code>504</code><label>AKoKORABEDITOA_504</label></item>
+<item><code>272</code><label>AKOKORAGYEHINI_272</label></item>
+<item><code>374</code><label>AKOKoSRADEe_374</label></item>
+<item><code>573</code><label>AKUAKUO-NINSUO_573</label></item>
+<item><code>231</code><label>AKUSAKUSA_231</label></item>
+<item><code>471</code><label>AKWANA_471</label></item>
+<item><code>115</code><label>AKYE_115</label></item>
+<item><code>117</code><label>AKYEBIRI_117</label></item>
+<item><code>116</code><label>AKYEKOBIRI_116</label></item>
+<item><code>160</code><label>AKYEKoKoo_160</label></item>
+<item><code>354</code><label>AKYEReKYEWeWA_354</label></item>
+<item><code>1299</code><label>AMANGYEDUA_1299</label></item>
+<item><code>251</code><label>AMUDURO_251</label></item>
+<item><code>1623</code><label>ANAKU_1623</label></item>
+<item><code>180</code><label>ANANSEDODOWA_180</label></item>
+<item><code>478</code><label>ANANSEDUA_478</label></item>
+<item><code>40</code><label>ANANTA_40</label></item>
+<item><code>211</code><label>ANANTA-AKOA_211</label></item>
+<item><code>601</code><label>ANENEDUA_601</label></item>
+<item><code>405</code><label>ANKYEWA_405</label></item>
+<item><code>22</code><label>ANOKYE-HYEDUA_22</label></item>
+<item><code>296</code><label>ANOMANI_296</label></item>
+<item><code>407</code><label>ANYANYANFOROWA_407</label></item>
+<item><code>27</code><label>APAPAYE_27</label></item>
+<item><code>530</code><label>APETERI_530</label></item>
+<item><code>550</code><label>APoSE-NINI_550</label></item>
+<item><code>401</code><label>APOTREWA_401</label></item>
+<item><code>94</code><label>APROKUMA_94</label></item>
+<item><code>586</code><label>ASAA_586</label></item>
+<item><code>585</code><label>ASAA-NINI_585</label></item>
+<item><code>483</code><label>ASABA_483</label></item>
+<item><code>1078</code><label>ASAMFENA_1078</label></item>
+<item><code>229</code><label>ASENAA_229</label></item>
+<item><code>588</code><label>ASIBENYANYA_588</label></item>
+<item><code>489</code><label>ASOMA_489</label></item>
+<item><code>583</code><label>ASOMANINI_583</label></item>
+<item><code>708</code><label>ASOMA-NUA_708</label></item>
+<item><code>216</code><label>ASRATOADUANINI_216</label></item>
+<item><code>469</code><label>ASRATOWADUA_469</label></item>
+<item><code>82</code><label>ASUMPA_82</label></item>
+<item><code>501</code><label>ATAA_501</label></item>
+<item><code>156</code><label>ATABENE_156</label></item>
+<item><code>575</code><label>ATOA_575</label></item>
+<item><code>130</code><label>ATROTRe_130</label></item>
+<item><code>250</code><label>ATWEA_250</label></item>
+<item><code>1250</code><label>ATWEA(-BERE)etc_1250</label></item>
+<item><code>245</code><label>ATWEAFUFU_245</label></item>
+<item><code>56</code><label>ATWERE_56</label></item>
+<item><code>247</code><label>ATWERE-NANTIN_247</label></item>
+<item><code>137</code><label>ATWIAWA_137</label></item>
+<item><code>31</code><label>AWIEMFOSAMINA_31</label></item>
+<item><code>65</code><label>AWIEMFOSAMINA-AKOA_65</label></item>
+<item><code>128</code><label>AWIEWU_128</label></item>
+<item><code>644</code><label>AWoNWENE_644</label></item>
+<item><code>87</code><label>AWORABoNToDEe_87</label></item>
+<item><code>396</code><label>AWORA-oPAM_396</label></item>
+<item><code>574</code><label>AWORATWEANKA_574</label></item>
+<item><code>580</code><label>AWURUKU_580</label></item>
+<item><code>96</code><label>AYEMTUDUA_96</label></item>
+<item><code>123</code><label>BADIE_123</label></item>
+<item><code>9</code><label>BAKU_9</label></item>
+<item><code>61</code><label>BAKUNINI_61</label></item>
+<item><code>264</code><label>BEDIBeSA_264</label></item>
+<item><code>35</code><label>BEDIWONUA_35</label></item>
+<item><code>248</code><label>BENKYI_248</label></item>
+<item><code>409</code><label>BEREKANKUM_409</label></item>
+<item><code>181</code><label>BESE_181</label></item>
+<item><code>184</code><label>BESETORO_184</label></item>
+<item><code>470</code><label>BODWE_470</label></item>
+<item><code>191</code><label>BoDWUE_191</label></item>
+<item><code>800</code><label>BoFRE_800</label></item>
+<item><code>336</code><label>BOHWE_336</label></item>
+<item><code>638</code><label>BoMMoFOKWADU_638</label></item>
+<item><code>46</code><label>BOMPAGYA_46</label></item>
+<item><code>42</code><label>BONSAMDUA_42</label></item>
+<item><code>86</code><label>BoNToDEe_86</label></item>
+<item><code>83</code><label>BoNToDEeBERE_83</label></item>
+<item><code>603</code><label>BReBReTIM_603</label></item>
+<item><code>801</code><label>CEDRELA_801</label></item>
+<item><code>196</code><label>CHELUM_196</label></item>
+<item><code>20</code><label>DAHOMA_20</label></item>
+<item><code>99</code><label>DAHOMANUA_99</label></item>
+<item><code>605</code><label>DAKONUA_605</label></item>
+<item><code>26</code><label>DANTA_26</label></item>
+<item><code>914</code><label>DAWA-DAWA_914</label></item>
+<item><code>39</code><label>DENYAo_39</label></item>
+<item><code>200</code><label>DODWATU_200</label></item>
+<item><code>70</code><label>DUA-AHABANUM_70</label></item>
+<item><code>72</code><label>DUA-AYAA_72</label></item>
+<item><code>353</code><label>DUABAHA_353</label></item>
+<item><code>227</code><label>DUABANKYE_227</label></item>
+<item><code>346</code><label>DUABIRI_346</label></item>
+<item><code>193</code><label>DUADe_193</label></item>
+<item><code>62</code><label>DUAGYENNE_62</label></item>
+<item><code>202</code><label>DUA-MOJA_202</label></item>
+<item><code>261</code><label>DUAMOKO_261</label></item>
+<item><code>465</code><label>DUAPOMPO_465</label></item>
+<item><code>279</code><label>DUASIKA_279</label></item>
+<item><code>508</code><label>DUASIKA-FUFUO_508</label></item>
+<item><code>157</code><label>DUATADWE_157</label></item>
+<item><code>155</code><label>DUATADWE-FUFUO_155</label></item>
+<item><code>152</code><label>DUATADWE-NINI_152</label></item>
+<item><code>8</code><label>DUBINI_8</label></item>
+<item><code>12</code><label>DUBINIBIRI_12</label></item>
+<item><code>415</code><label>DUBRAFO_415</label></item>
+<item><code>252</code><label>DUBRAFONINI_252</label></item>
+<item><code>546</code><label>DUOBOROBAE_546</label></item>
+<item><code>228</code><label>DWEDWEEDWE_228</label></item>
+<item><code>381</code><label>DWINDWERA_381</label></item>
+<item><code>3</code><label>EDINAM_3</label></item>
+<item><code>5</code><label>EFOoBRODEDWO_5</label></item>
+<item><code>584</code><label>EHUREKE_584</label></item>
+<item><code>13</code><label>EMIRE_13</label></item>
+<item><code>185</code><label>ENTEDUA_185</label></item>
+<item><code>37</code><label>ESA_37</label></item>
+<item><code>38</code><label>ESAKoKo_38</label></item>
+<item><code>36</code><label>ESAKOSUA_36</label></item>
+<item><code>880</code><label>eSERESO-DUBIN_880</label></item>
+<item><code>124</code><label>eSERESOKRODUA_124</label></item>
+<item><code>907</code><label>eSERESO-KUSIA_907</label></item>
+<item><code>961</code><label>eSERESO-OFRAM_961</label></item>
+<item><code>48</code><label>ESIA_48</label></item>
+<item><code>466</code><label>ESONODoKONO_466</label></item>
+<item><code>113</code><label>ESONODUA_113</label></item>
+<item><code>640</code><label>eSONOKWADU_640</label></item>
+<item><code>358</code><label>ESONONANKOROMA_358</label></item>
+<item><code>232</code><label>eSONOWEDIE_232</label></item>
+<item><code>1223</code><label>eSONOWISAMFIE_1223</label></item>
+<item><code>225</code><label>eSONOWISAMFIEBERE_225</label></item>
+<item><code>224</code><label>eSONOWISAMFIENINI_224</label></item>
+<item><code>163</code><label>ESUINIA_163</label></item>
+<item><code>436</code><label>FAFRAHA_436</label></item>
+<item><code>557</code><label>FAWERE_557</label></item>
+<item><code>500</code><label>FeLeFeLe_500</label></item>
+<item><code>253</code><label>FeTeFRe_253</label></item>
+<item><code>656</code><label>FOBA_656</label></item>
+<item><code>507</code><label>FOTIE-NUA_507</label></item>
+<item><code>345</code><label>FoTo_345</label></item>
+<item><code>92</code><label>FOTO-NINI_92</label></item>
+<item><code>385</code><label>FoToNUA_385</label></item>
+<item><code>240</code><label>FRENCH_240</label></item>
+<item><code>330</code><label>FRUNTUM_330</label></item>
+<item><code>237</code><label>GBLITSO_237</label></item>
+<item><code>67</code><label>GYAMA_67</label></item>
+<item><code>68</code><label>GYAMANINI_68</label></item>
+<item><code>289</code><label>GYANEYA_289</label></item>
+<item><code>286</code><label>GYIGYAM_286</label></item>
+<item><code>532</code><label>HOTe_532</label></item>
+<item><code>349</code><label>HOTROHOTRO_349</label></item>
+<item><code>659</code><label>HWENETIA_659</label></item>
+<item><code>214</code><label>HYEDUA_214</label></item>
+<item><code>535</code><label>KAFIEKAFIE_535</label></item>
+<item><code>512</code><label>KAFUOSO_512</label></item>
+<item><code>511</code><label>KAFUOSONINI_511</label></item>
+<item><code>411</code><label>KAJABIRI_411</label></item>
+<item><code>620</code><label>KAKADIKURO_620</label></item>
+<item><code>114</code><label>KAKADUA_114</label></item>
+<item><code>538</code><label>KAKAPENPEN_538</label></item>
+<item><code>19</code><label>KAKU_19</label></item>
+<item><code>81</code><label>KANe_81</label></item>
+<item><code>120</code><label>KANKABIM_120</label></item>
+<item><code>673</code><label>KANTO_673</label></item>
+<item><code>1361</code><label>KANWENE_1361</label></item>
+<item><code>361</code><label>KANWENE-AKOA_361</label></item>
+<item><code>525</code><label>KATAWANI_525</label></item>
+<item><code>263</code><label>KATRIKA_263</label></item>
+<item><code>268</code><label>KATRIKABERE_268</label></item>
+<item><code>265</code><label>KATRIKANINI_265</label></item>
+<item><code>258</code><label>KESENE_258</label></item>
+<item><code>560</code><label>KETEBONTORE_560</label></item>
+<item><code>563</code><label>KOKOFOBENE_563</label></item>
+<item><code>34</code><label>KoKoTE_34</label></item>
+<item><code>80</code><label>KoKoTE-AKOA_80</label></item>
+<item><code>1139</code><label>KoKoTENUA_1139</label></item>
+<item><code>486</code><label>KOKROBOBA_486</label></item>
+<item><code>11</code><label>KOKRODUA_11</label></item>
+<item><code>125</code><label>KONINI_125</label></item>
+<item><code>442</code><label>KONKROMA_442</label></item>
+<item><code>633</code><label>KONTAMMIRI_633</label></item>
+<item><code>634</code><label>KONTAN_634</label></item>
+<item><code>632</code><label>KONTANAKOA_632</label></item>
+<item><code>479</code><label>KORANTEMA_479</label></item>
+<item><code>681</code><label>KORANTEMA-NINI_681</label></item>
+<item><code>350</code><label>KOSOWA_350</label></item>
+<item><code>650</code><label>KOSOWANINI_650</label></item>
+<item><code>209</code><label>KoTo-BOWERE_209</label></item>
+<item><code>599</code><label>KOTOMPRE_599</label></item>
+<item><code>126</code><label>KOTOPRePre_126</label></item>
+<item><code>291</code><label>KRAKA_291</label></item>
+<item><code>102</code><label>KROBODUA_102</label></item>
+<item><code>376</code><label>KROMA_376</label></item>
+<item><code>494</code><label>KRONKOO_494</label></item>
+<item><code>7</code><label>KRUBA_7</label></item>
+<item><code>6</code><label>KRUMBEN_6</label></item>
+<item><code>378</code><label>KUMANINI_378</label></item>
+<item><code>481</code><label>KUMDWIE_481</label></item>
+<item><code>154</code><label>KUMFANA_154</label></item>
+<item><code>378</code><label>KUMNINI_378</label></item>
+<item><code>10</code><label>KUSIA_10</label></item>
+<item><code>242</code><label>KUSIBIRI_242</label></item>
+<item><code>164</code><label>KWAA-ANKAA_164</label></item>
+<item><code>460</code><label>KWAASIWA_460</label></item>
+<item><code>17</code><label>KWABOHORO_17</label></item>
+<item><code>18</code><label>KWADWUMA_18</label></item>
+<item><code>59</code><label>KWAE-AKENKA_59</label></item>
+<item><code>206</code><label>KWAEBRoFRE_206</label></item>
+<item><code>608</code><label>KWAEKoFI_608</label></item>
+<item><code>1608</code><label>KWAE-KOFI_1608</label></item>
+<item><code>480</code><label>KWAETAWA_480</label></item>
+<item><code>233</code><label>KWAKUO-ASENABA_233</label></item>
+<item><code>207</code><label>KWAKUO-ASRA_207</label></item>
+<item><code>135</code><label>KWAKUOBESE_135</label></item>
+<item><code>2000</code><label>KWATAFOMPABOA_2000</label></item>
+<item><code>112</code><label>KWATAFOMPABOABERE_112</label></item>
+<item><code>111</code><label>KWATAFOMPABOAKoKoo_111</label></item>
+<item><code>110</code><label>KWATAFOMPABOANINI_110</label></item>
+<item><code>1110</code><label>KWATAFONPABOA_1110</label></item>
+<item><code>347</code><label>KYAPOTORO_347</label></item>
+<item><code>21</code><label>KYENKYEN_21</label></item>
+<item><code>534</code><label>KYEREYe_534</label></item>
+<item><code>533</code><label>KYEREYeBERE_533</label></item>
+<item><code>91</code><label>KYIRIKUSA_91</label></item>
+<item><code>97</code><label>MEAWERE_97</label></item>
+<item><code>254</code><label>MFo_254</label></item>
+<item><code>2120</code><label>MMAKUBE_2120</label></item>
+<item><code>1218</code><label>MMATA_1218</label></item>
+<item><code>441</code><label>MOTOKURADUA_441</label></item>
+<item><code>103</code><label>MPAMPRO_103</label></item>
+<item><code>167</code><label>MPAWU_167</label></item>
+<item><code>547</code><label>MPAWUNTUNTUM_547</label></item>
+<item><code>348</code><label>MPEDURO_348</label></item>
+<item><code>45</code><label>NAKWA_45</label></item>
+<item><code>169</code><label>NGONENKYENE_169</label></item>
+<item><code>770</code><label>NKUDUA_770</label></item>
+<item><code>109</code><label>NNANFURO_109</label></item>
+<item><code>332</code><label>NSoKo_332</label></item>
+<item><code>333</code><label>NSoKoNUA_333</label></item>
+<item><code>561</code><label>NSOTO_561</label></item>
+<item><code>257</code><label>NToNMe_257</label></item>
+<item><code>101</code><label>NTWESON_101</label></item>
+<item><code>375</code><label>NUFUTEN_375</label></item>
+<item><code>93</code><label>NUMANUMAGYAMA_93</label></item>
+<item><code>300</code><label>NWADUA_300</label></item>
+<item><code>198</code><label>NYAMREM_198</label></item>
+<item><code>15</code><label>NYANKOM_15</label></item>
+<item><code>444</code><label>NYANKUMABERE_444</label></item>
+<item><code>445</code><label>NYANKUMANINI_445</label></item>
+<item><code>307</code><label>NYANKYEReNE_307</label></item>
+<item><code>146</code><label>NYEREMESA_146</label></item>
+<item><code>1661</code><label>oBAA_1661</label></item>
+<item><code>664</code><label>oBAAFUFUO_664</label></item>
+<item><code>663</code><label>oBAAKoKo_663</label></item>
+<item><code>417</code><label>oBOGYANEBOoBEREE_417</label></item>
+<item><code>418</code><label>oBOGYANEBOoNINI_418</label></item>
+<item><code>589</code><label>OBONAWA_589</label></item>
+<item><code>446</code><label>oBUA_446</label></item>
+<item><code>60</code><label>OBUOBI_60</label></item>
+<item><code>463</code><label>ODII_463</label></item>
+<item><code>44</code><label>oDOM_44</label></item>
+<item><code>1001</code><label>ODUM_1001</label></item>
+<item><code>1</code><label>ODUM-NUA_1</label></item>
+<item><code>104</code><label>oDWEN_104</label></item>
+<item><code>105</code><label>oDWENKOBIRI_105</label></item>
+<item><code>443</code><label>oDWUMA_443</label></item>
+<item><code>431</code><label>oFEMA_431</label></item>
+<item><code>53</code><label>oFRAM_53</label></item>
+<item><code>655</code><label>OFURUMA_655</label></item>
+<item><code>134</code><label>OGYAPAMNINI_134</label></item>
+<item><code>467</code><label>OGYATAFONKONWA_467</label></item>
+<item><code>577</code><label>OHAA_577</label></item>
+<item><code>329</code><label>OKAE_329</label></item>
+<item><code>66</code><label>oKORA-AKOA_66</label></item>
+<item><code>32</code><label>oKORO_32</label></item>
+<item><code>188</code><label>OKOSU_188</label></item>
+<item><code>667</code><label>OKUO_667</label></item>
+<item><code>668</code><label>OKUONINI_668</label></item>
+<item><code>630</code><label>OKURE_630</label></item>
+<item><code>274</code><label>OKYINI_274</label></item>
+<item><code>244</code><label>oMENEWA_244</label></item>
+<item><code>243</code><label>oMENEWABERE_243</label></item>
+<item><code>682</code><label>oMENEWA-NINI_682</label></item>
+<item><code>281</code><label>ONIBONA_281</label></item>
+<item><code>282</code><label>ONIBONAKoKoo_282</label></item>
+<item><code>159</code><label>ONIBONANUA_159</label></item>
+<item><code>402</code><label>oNWAMDUA_402</label></item>
+<item><code>516</code><label>ONWENMA_516</label></item>
+<item><code>143</code><label>ONYINA_143</label></item>
+<item><code>118</code><label>ONYINAKoBEN_118</label></item>
+<item><code>1270</code><label>oPAHA_1270</label></item>
+<item><code>271</code><label>oPAHA-AKOA_271</label></item>
+<item><code>260</code><label>oPAHA-BERE_260</label></item>
+<item><code>262</code><label>oPAHAFUFUO_262</label></item>
+<item><code>269</code><label>oPAHAKoKoo_269</label></item>
+<item><code>266</code><label>oPAHA-NINI_266</label></item>
+<item><code>394</code><label>oPAM_394</label></item>
+<item><code>397</code><label>oPAMFUFUO_397</label></item>
+<item><code>395</code><label>oPAMKoKoo_395</label></item>
+<item><code>1121</code><label>oPAMKOTOKRODU_1121</label></item>
+<item><code>122</code><label>oPAMKOTOKRODUKeSe_122</label></item>
+<item><code>327</code><label>OPANTO_327</label></item>
+<item><code>565</code><label>OPRIM_565</label></item>
+<item><code>23</code><label>OPRONO_23</label></item>
+<item><code>475</code><label>OPUNINI_475</label></item>
+<item><code>174</code><label>oSONKUROBIA_174</label></item>
+<item><code>285</code><label>oSORE_285</label></item>
+<item><code>1284</code><label>oSOROWA_1284</label></item>
+<item><code>283</code><label>oSOROWA-NINI_283</label></item>
+<item><code>49</code><label>OTIE_49</label></item>
+<item><code>239</code><label>OTWABERE_239</label></item>
+<item><code>422</code><label>oTWE-ANI_422</label></item>
+<item><code>637</code><label>oTWE-EHI_637</label></item>
+<item><code>64</code><label>OTWENSONO_64</label></item>
+<item><code>651</code><label>oTWENTOROWA_651</label></item>
+<item><code>653</code><label>OTWENTOROWABERE_653</label></item>
+<item><code>654</code><label>OTWENTOROWANINI_654</label></item>
+<item><code>1428</code><label>oTWESE_1428</label></item>
+<item><code>424</code><label>oTWESENINI_424</label></item>
+<item><code>249</code><label>oTWETO_249</label></item>
+<item><code>1237</code><label>oTWETO-oMENEWA_1237</label></item>
+<item><code>1359</code><label>oWEBIRIBI_1359</label></item>
+<item><code>646</code><label>OWUDIFOKeTe_646</label></item>
+<item><code>669</code><label>OYAA_669</label></item>
+<item><code>1667</code><label>OYAA/OKUO_1667</label></item>
+<item><code>666</code><label>OYAABERE_666</label></item>
+<item><code>672</code><label>OYAANINI_672</label></item>
+<item><code>30</code><label>PAMPENA_30</label></item>
+<item><code>190</code><label>PAMPENAMA_190</label></item>
+<item><code>493</code><label>PAMPRANA-NUA_493</label></item>
+<item><code>136</code><label>PANUM_136</label></item>
+<item><code>28</code><label>PAPAO_28</label></item>
+<item><code>4</code><label>PENKWA_4</label></item>
+<item><code>16</code><label>PENKWA-AKOA_16</label></item>
+<item><code>416</code><label>PEPEA_416</label></item>
+<item><code>503</code><label>PEPEABERE_503</label></item>
+<item><code>287</code><label>PEPEANINI_287</label></item>
+<item><code>803</code><label>PePeDIAWUO_803</label></item>
+<item><code>1420</code><label>POBE_1420</label></item>
+<item><code>43</code><label>POTRODOM_43</label></item>
+<item><code>600</code><label>PReKeSE_600</label></item>
+<item><code>145</code><label>PREMPRESA_145</label></item>
+<item><code>556</code><label>SABOBE_556</label></item>
+<item><code>553</code><label>SAMANKUBE_553</label></item>
+<item><code>166</code><label>SAMANOBI_166</label></item>
+<item><code>203</code><label>SAMANTAANINI_203</label></item>
+<item><code>658</code><label>SAMANTAWA_658</label></item>
+<item><code>78</code><label>SAMFENA_78</label></item>
+<item><code>79</code><label>SAMFENANINI_79</label></item>
+<item><code>391</code><label>SANTE_391</label></item>
+<item><code>41</code><label>SANZA-MULIKA_41</label></item>
+<item><code>355</code><label>SESE_355</label></item>
+<item><code>604</code><label>SESEA_604</label></item>
+<item><code>148</code><label>SESEDUA_148</label></item>
+<item><code>452</code><label>SESEMASA_452</label></item>
+<item><code>352</code><label>SIKAKYIA_352</label></item>
+<item><code>73</code><label>SINURO_73</label></item>
+<item><code>578</code><label>SOFO_578</label></item>
+<item><code>33</code><label>SONKYI_33</label></item>
+<item><code>215</code><label>SOPI_215</label></item>
+<item><code>1024</code><label>SUBAHA_1024</label></item>
+<item><code>25</code><label>SUBAHA-AKOA_25</label></item>
+<item><code>447</code><label>SUKUSIA_447</label></item>
+<item><code>652</code><label>SUPOWA_652</label></item>
+<item><code>435</code><label>TAATSO_435</label></item>
+<item><code>365</code><label>TAKOROWA_365</label></item>
+<item><code>592</code><label>TAKOROWANUA_592</label></item>
+<item><code>226</code><label>TAKYIKYIRIWA_226</label></item>
+<item><code>175</code><label>TANA-NFRe_175</label></item>
+<item><code>183</code><label>TANANFRoBERE_183</label></item>
+<item><code>618</code><label>TANDRO_618</label></item>
+<item><code>621</code><label>TANURONINI_621</label></item>
+<item><code>804</code><label>TEAK_804</label></item>
+<item><code>71</code><label>TETEDUA_71</label></item>
+<item><code>341</code><label>TETEKON_341</label></item>
+<item><code>342</code><label>TETEKON-GYAMERA_342</label></item>
+<item><code>340</code><label>TETEKON-NUA_340</label></item>
+<item><code>434</code><label>TETETOA_434</label></item>
+<item><code>132</code><label>TETIA-DUPoN_132</label></item>
+<item><code>50</code><label>TIABUTUO_50</label></item>
+<item><code>89</code><label>TOTORO_89</label></item>
+<item><code>88</code><label>TOTORONINI_88</label></item>
+<item><code>552</code><label>TUKOBO_552</label></item>
+<item><code>612</code><label>TUROMDUA_612</label></item>
+<item><code>569</code><label>TURUNNUA_569</label></item>
+<item><code>90</code><label>TUTUABO_90</label></item>
+<item><code>106</code><label>TWEANKA_106</label></item>
+<item><code>335</code><label>TWEAPIA_335</label></item>
+<item><code>334</code><label>TWEAPIAKOA_334</label></item>
+<item><code>432</code><label>TWEAWODO_432</label></item>
+<item><code>186</code><label>TWENEBOA_186</label></item>
+<item><code>189</code><label>TWENEBOA-AKOA_189</label></item>
+<item><code>187</code><label>TWENEBOABERE_187</label></item>
+<item><code>541</code><label>WAMA_541</label></item>
+<item><code>178</code><label>WATAPUO_178</label></item>
+<item><code>179</code><label>WATAPUOBERE_179</label></item>
+<item><code>14</code><label>WAWA_14</label></item>
+<item><code>51</code><label>WAWABIMA_51</label></item>
+<item><code>440</code><label>WEDEABA_440</label></item>
+<item><code>461</code><label>WISUBONI_461</label></item>
+<item><code>220</code><label>WOAGYE-AKOA_220</label></item>
+<item><code>47</code><label>WONTON_47</label></item>
+<item><code>76</code><label>YAYA_76</label></item>
+<item><code>2049</code><label>YAYA-AKOA_2049</label></item>
+<item><code>802</code><label>YORK_802</label></item>
+<item><code>55</code><label>_55</label></item>
+<item><code>57</code><label>_57</label></item>
+<item><code>58</code><label>_58</label></item>
+<item><code>69</code><label>_69</label></item>
+<item><code>74</code><label>_74</label></item>
+<item><code>75</code><label>_75</label></item>
+<item><code>77</code><label>_77</label></item>
+<item><code>84</code><label>_84</label></item>
+<item><code>85</code><label>_85</label></item>
+<item><code>95</code><label>_95</label></item>
+<item><code>98</code><label>_98</label></item>
+<item><code>100</code><label>_100</label></item>
+<item><code>107</code><label>_107</label></item>
+<item><code>108</code><label>_108</label></item>
+<item><code>127</code><label>_127</label></item>
+<item><code>129</code><label>_129</label></item>
+<item><code>131</code><label>_131</label></item>
+<item><code>138</code><label>_138</label></item>
+<item><code>141</code><label>_141</label></item>
+<item><code>144</code><label>_144</label></item>
+<item><code>149</code><label>_149</label></item>
+<item><code>151</code><label>_151</label></item>
+<item><code>153</code><label>_153</label></item>
+<item><code>161</code><label>_161</label></item>
+<item><code>162</code><label>_162</label></item>
+<item><code>165</code><label>_165</label></item>
+<item><code>168</code><label>_168</label></item>
+<item><code>171</code><label>_171</label></item>
+<item><code>172</code><label>_172</label></item>
+<item><code>173</code><label>_173</label></item>
+<item><code>176</code><label>_176</label></item>
+<item><code>182</code><label>_182</label></item>
+<item><code>192</code><label>_192</label></item>
+<item><code>195</code><label>_195</label></item>
+<item><code>197</code><label>_197</label></item>
+<item><code>199</code><label>_199</label></item>
+<item><code>201</code><label>_201</label></item>
+<item><code>204</code><label>_204</label></item>
+<item><code>205</code><label>_205</label></item>
+<item><code>208</code><label>_208</label></item>
+<item><code>210</code><label>_210</label></item>
+<item><code>213</code><label>_213</label></item>
+<item><code>217</code><label>_217</label></item>
+<item><code>219</code><label>_219</label></item>
+<item><code>221</code><label>_221</label></item>
+<item><code>222</code><label>_222</label></item>
+<item><code>230</code><label>_230</label></item>
+<item><code>234</code><label>_234</label></item>
+<item><code>235</code><label>_235</label></item>
+<item><code>236</code><label>_236</label></item>
+<item><code>241</code><label>_241</label></item>
+<item><code>246</code><label>_246</label></item>
+<item><code>255</code><label>_255</label></item>
+<item><code>256</code><label>_256</label></item>
+<item><code>259</code><label>_259</label></item>
+<item><code>267</code><label>_267</label></item>
+<item><code>273</code><label>_273</label></item>
+<item><code>275</code><label>_275</label></item>
+<item><code>277</code><label>_277</label></item>
+<item><code>280</code><label>_280</label></item>
+<item><code>288</code><label>_288</label></item>
+<item><code>290</code><label>_290</label></item>
+<item><code>292</code><label>_292</label></item>
+<item><code>293</code><label>_293</label></item>
+<item><code>294</code><label>_294</label></item>
+<item><code>295</code><label>_295</label></item>
+<item><code>298</code><label>_298</label></item>
+<item><code>299</code><label>_299</label></item>
+<item><code>302</code><label>_302</label></item>
+<item><code>303</code><label>_303</label></item>
+<item><code>304</code><label>_304</label></item>
+<item><code>308</code><label>_308</label></item>
+<item><code>309</code><label>_309</label></item>
+<item><code>310</code><label>_310</label></item>
+<item><code>311</code><label>_311</label></item>
+<item><code>312</code><label>_312</label></item>
+<item><code>315</code><label>_315</label></item>
+<item><code>323</code><label>_323</label></item>
+<item><code>326</code><label>_326</label></item>
+<item><code>328</code><label>_328</label></item>
+<item><code>331</code><label>_331</label></item>
+<item><code>337</code><label>_337</label></item>
+<item><code>338</code><label>_338</label></item>
+<item><code>339</code><label>_339</label></item>
+<item><code>344</code><label>_344</label></item>
+<item><code>351</code><label>_351</label></item>
+<item><code>356</code><label>_356</label></item>
+<item><code>359</code><label>_359</label></item>
+<item><code>360</code><label>_360</label></item>
+<item><code>362</code><label>_362</label></item>
+<item><code>363</code><label>_363</label></item>
+<item><code>364</code><label>_364</label></item>
+<item><code>366</code><label>_366</label></item>
+<item><code>367</code><label>_367</label></item>
+<item><code>369</code><label>_369</label></item>
+<item><code>370</code><label>_370</label></item>
+<item><code>371</code><label>_371</label></item>
+<item><code>373</code><label>_373</label></item>
+<item><code>377</code><label>_377</label></item>
+<item><code>379</code><label>_379</label></item>
+<item><code>382</code><label>_382</label></item>
+<item><code>383</code><label>_383</label></item>
+<item><code>386</code><label>_386</label></item>
+<item><code>387</code><label>_387</label></item>
+<item><code>388</code><label>_388</label></item>
+<item><code>389</code><label>_389</label></item>
+<item><code>390</code><label>_390</label></item>
+<item><code>392</code><label>_392</label></item>
+<item><code>393</code><label>_393</label></item>
+<item><code>398</code><label>_398</label></item>
+<item><code>399</code><label>_399</label></item>
+<item><code>400</code><label>_400</label></item>
+<item><code>403</code><label>_403</label></item>
+<item><code>404</code><label>_404</label></item>
+<item><code>406</code><label>_406</label></item>
+<item><code>408</code><label>_408</label></item>
+<item><code>410</code><label>_410</label></item>
+<item><code>413</code><label>_413</label></item>
+<item><code>419</code><label>_419</label></item>
+<item><code>421</code><label>_421</label></item>
+<item><code>423</code><label>_423</label></item>
+<item><code>425</code><label>_425</label></item>
+<item><code>426</code><label>_426</label></item>
+<item><code>427</code><label>_427</label></item>
+<item><code>429</code><label>_429</label></item>
+<item><code>430</code><label>_430</label></item>
+<item><code>433</code><label>_433</label></item>
+<item><code>437</code><label>_437</label></item>
+<item><code>438</code><label>_438</label></item>
+<item><code>439</code><label>_439</label></item>
+<item><code>448</code><label>_448</label></item>
+<item><code>449</code><label>_449</label></item>
+<item><code>450</code><label>_450</label></item>
+<item><code>451</code><label>_451</label></item>
+<item><code>453</code><label>_453</label></item>
+<item><code>455</code><label>_455</label></item>
+<item><code>456</code><label>_456</label></item>
+<item><code>457</code><label>_457</label></item>
+<item><code>458</code><label>_458</label></item>
+<item><code>459</code><label>_459</label></item>
+<item><code>468</code><label>_468</label></item>
+<item><code>472</code><label>_472</label></item>
+<item><code>473</code><label>_473</label></item>
+<item><code>474</code><label>_474</label></item>
+<item><code>476</code><label>_476</label></item>
+<item><code>477</code><label>_477</label></item>
+<item><code>484</code><label>_484</label></item>
+<item><code>485</code><label>_485</label></item>
+<item><code>487</code><label>_487</label></item>
+<item><code>490</code><label>_490</label></item>
+<item><code>491</code><label>_491</label></item>
+<item><code>492</code><label>_492</label></item>
+<item><code>495</code><label>_495</label></item>
+<item><code>496</code><label>_496</label></item>
+<item><code>497</code><label>_497</label></item>
+<item><code>498</code><label>_498</label></item>
+<item><code>499</code><label>_499</label></item>
+<item><code>505</code><label>_505</label></item>
+<item><code>509</code><label>_509</label></item>
+<item><code>510</code><label>_510</label></item>
+<item><code>513</code><label>_513</label></item>
+<item><code>514</code><label>_514</label></item>
+<item><code>515</code><label>_515</label></item>
+<item><code>517</code><label>_517</label></item>
+<item><code>518</code><label>_518</label></item>
+<item><code>519</code><label>_519</label></item>
+<item><code>520</code><label>_520</label></item>
+<item><code>521</code><label>_521</label></item>
+<item><code>524</code><label>_524</label></item>
+<item><code>526</code><label>_526</label></item>
+<item><code>527</code><label>_527</label></item>
+<item><code>528</code><label>_528</label></item>
+<item><code>529</code><label>_529</label></item>
+<item><code>531</code><label>_531</label></item>
+<item><code>537</code><label>_537</label></item>
+<item><code>539</code><label>_539</label></item>
+<item><code>540</code><label>_540</label></item>
+<item><code>542</code><label>_542</label></item>
+<item><code>543</code><label>_543</label></item>
+<item><code>544</code><label>_544</label></item>
+<item><code>545</code><label>_545</label></item>
+<item><code>548</code><label>_548</label></item>
+<item><code>549</code><label>_549</label></item>
+<item><code>551</code><label>_551</label></item>
+<item><code>554</code><label>_554</label></item>
+<item><code>555</code><label>_555</label></item>
+<item><code>559</code><label>_559</label></item>
+<item><code>562</code><label>_562</label></item>
+<item><code>564</code><label>_564</label></item>
+<item><code>566</code><label>_566</label></item>
+<item><code>567</code><label>_567</label></item>
+<item><code>568</code><label>_568</label></item>
+<item><code>570</code><label>_570</label></item>
+<item><code>576</code><label>_576</label></item>
+<item><code>579</code><label>_579</label></item>
+<item><code>581</code><label>_581</label></item>
+<item><code>582</code><label>_582</label></item>
+<item><code>587</code><label>_587</label></item>
+<item><code>590</code><label>_590</label></item>
+<item><code>591</code><label>_591</label></item>
+<item><code>593</code><label>_593</label></item>
+<item><code>594</code><label>_594</label></item>
+<item><code>595</code><label>_595</label></item>
+<item><code>596</code><label>_596</label></item>
+<item><code>597</code><label>_597</label></item>
+<item><code>598</code><label>_598</label></item>
+<item><code>602</code><label>_602</label></item>
+<item><code>606</code><label>_606</label></item>
+<item><code>607</code><label>_607</label></item>
+<item><code>609</code><label>_609</label></item>
+<item><code>610</code><label>_610</label></item>
+<item><code>611</code><label>_611</label></item>
+<item><code>613</code><label>_613</label></item>
+<item><code>614</code><label>_614</label></item>
+<item><code>616</code><label>_616</label></item>
+<item><code>617</code><label>_617</label></item>
+<item><code>619</code><label>_619</label></item>
+<item><code>622</code><label>_622</label></item>
+<item><code>624</code><label>_624</label></item>
+<item><code>625</code><label>_625</label></item>
+<item><code>626</code><label>_626</label></item>
+<item><code>627</code><label>_627</label></item>
+<item><code>628</code><label>_628</label></item>
+<item><code>629</code><label>_629</label></item>
+<item><code>631</code><label>_631</label></item>
+<item><code>635</code><label>_635</label></item>
+<item><code>636</code><label>_636</label></item>
+<item><code>639</code><label>_639</label></item>
+<item><code>641</code><label>_641</label></item>
+<item><code>642</code><label>_642</label></item>
+<item><code>643</code><label>_643</label></item>
+<item><code>645</code><label>_645</label></item>
+<item><code>647</code><label>_647</label></item>
+<item><code>648</code><label>_648</label></item>
+<item><code>649</code><label>_649</label></item>
+<item><code>657</code><label>_657</label></item>
+<item><code>660</code><label>_660</label></item>
+<item><code>662</code><label>_662</label></item>
+<item><code>665</code><label>_665</label></item>
+<item><code>670</code><label>_670</label></item>
+<item><code>671</code><label>_671</label></item>
+<item><code>674</code><label>_674</label></item>
+<item><code>675</code><label>_675</label></item>
+<item><code>683</code><label>_683</label></item>
+<item><code>781</code><label>_781</label></item>
+<item><code>824</code><label>_824</label></item>
+<item><code>827</code><label>_827</label></item>
+<item><code>891</code><label>_891</label></item>
+<item><code>894</code><label>_894</label></item>
+<item><code>901</code><label>_901</label></item>
+<item><code>1037</code><label>_1037</label></item>
+<item><code>1038</code><label>_1038</label></item>
+<item><code>1081</code><label>_1081</label></item>
+<item><code>1086</code><label>_1086</label></item>
+<item><code>1099</code><label>_1099</label></item>
+<item><code>1131</code><label>_1131</label></item>
+<item><code>1160</code><label>_1160</label></item>
+<item><code>1184</code><label>_1184</label></item>
+<item><code>1265</code><label>_1265</label></item>
+<item><code>1300</code><label>_1300</label></item>
+<item><code>1334</code><label>_1334</label></item>
+<item><code>1394</code><label>_1394</label></item>
+<item><code>1417</code><label>_1417</label></item>
+<item><code>1460</code><label>_1460</label></item>
+<item><code>1466</code><label>_1466</label></item>
+<item><code>1512</code><label>_1512</label></item>
+<item><code>1547</code><label>_1547</label></item>
+<item><code>1560</code><label>_1560</label></item>
+<item><code>1634</code><label>_1634</label></item>
+<item><code>1651</code><label>_1651</label></item>
+<item><code>1809</code><label>_1809</label></item>
+<item><code>2008</code><label>_2008</label></item>
+<item><code>2355</code><label>_2355</label></item>
+<item><code>2978</code><label>_2978</label></item>
+<item><code>-1</code><label>Other treees and plants</label></item>
+            </items>
+        </list>	
+		<list name="decomposition_class">
+            <label type="list">Choose decomposition class</label>
+            <items>
+                <item>
+                    <code>0</code>
+                    <label>Tree with branches and twigs and resembles a live tree except for leaves</label>
+                </item>
+                <item>
+                    <code>1</code>
+                    <label>Tree with no twig, but with persistent small and large branches</label>
+                </item>
+                <item>
+                    <code>2</code>
+                    <label>Tree with only large branches</label>
+                </item>
+				<item>
+                    <code>3</code>
+                    <label>Bole only, no branches</label>
+                </item>
+            </items>
+        </list>
+		<list name="decomposition_stage">
+            <label type="list">Choose decomposition class</label>
+            <items>
+                <item>
+                    <code>0</code>
+                    <label>Sound, blade does not sink or is bounced off</label>
+                </item>
+                <item>
+                    <code>1</code>
+                    <label>Moderate, blade partly sinks into the piece of wood or there has been some wood loss</label>
+                </item>
+                <item>
+                    <code>2</code>
+                    <label>Rotten, blade sinks well into the piece, there is extensive wood loss and the piece is crumbly</label>
+                </item>
+            </items>
+        </list>			
+    </codeLists>
+    <units>       
+    	 <unit name="m" dimension="length" conversionFactor="1.0">
+            <label>metres</label>
+            <abbreviation>m</abbreviation>
+        </unit>
+        <unit name="cm" dimension="length" conversionFactor="0.01">
+            <label>centimetres</label>
+            <abbreviation>cm</abbreviation>
+        </unit>
+		<unit name="g" dimension="weight" conversionFactor="0.001">
+            <label>grams</label>
+            <abbreviation>g</abbreviation>
+        </unit>
+    </units>
+    <schema>
+        <entity name="cluster" ui:tab="cluster">
+            <label type="instance">General</label>
+			<number type="integer" name="cluster_number" key="true">
+				<label type="instance">Cluster number</label>
+			</number>
+			<text name="remarks">
+				<label type="instance">Remarks</label>
+            </text>	  
+            <entity name="plot" ui:tab="plot" multiple="true">
+                <label type="instance">Plot</label>
+				<text name="plot_number" ui:tab="plot_det" key="true">
+					<label type="instance">Plot ID</label>
+				</text>				
+				<date name="date" ui:tab="plot_det">
+					<label type="instance">Date</label>
+				</date>
+				<time name="logging_time" ui:tab="plot_det">
+					<label type="instance">Logging time</label>
+				</time>	
+				<text name="team_leader" ui:tab="plot_det">
+					<label type="instance">Team leader</label>
+				</text>
+				<entity name="utm_coords" multiple="false" ui:tab="plot_det">
+					<label type="instance">UTM coordinates</label>
+					<number type="real" name="latitude" ui:tab="plot_det">
+						<label type="instance">Latitude</label>
+					</number>
+					<number type="real" name="longitude" ui:tab="plot_det" >
+						<label type="instance">Longitude</label>
+					</number>													
+				</entity>
+				<text name="remarks" ui:tab="plot_det">
+					<label type="instance">Remarks</label>					
+				</text>
+				<code name="main_site_type" list="main_site_type" ui:tab="land">
+                    <label type="instance">Main site type</label>
+                </code>
+				<code name="ipcc_land_use" list="ipcc_land_use" ui:tab="land">
+                    <label type="instance">IPCC land use class</label>
+                </code>
+				<code name="fao_land_use" list="fao_land_use" ui:tab="land">
+                    <label type="instance">FAO land use class</label>
+                </code>
+				<number type="integer" name="canopy_cover" ui:tab="land">
+					<label type="instance">Free cell count</label>
+				</number>
+				<entity name="tally_tree" multiple="true" ui:tab="tally_tree">
+					<label type="instance">Tally trees</label>
+					<number type="integer" name="tally_tree_id">
+						<label type="instance">Tree ID</label>
+					</number>
+					<number type="integer" name="species_id_tally_tree">
+						<label type="instance">Species ID</label>
+					</number>
+					<code name="species_name_code_tally_tree" list="species_name">
+						<label type="instance">Species name</label>
+					</code>
+					<number type="real" name="tree_diameter_tally_tree">
+						<label type="instance">Tree diameter</label>
+						<precision unit="cm" decimalDigits="1"/>
+						<compare gte="0" lte="700" flag="error"/>	
+					</number>
+					<number type="integer" name="pom_tally_tree">
+						<label type="instance">pom</label>
+					</number>					
+					<number type="real" name="tree_height_tally_tree">
+						<label type="instance">Tree height</label>
+						<precision unit="m" decimalDigits="1"/>
+						<compare gte="0" lte="100" flag="error"/>						
+					</number>
+					<number type="real" name="base_length_tally_tree">
+						<label type="instance">Base length</label>
+						<precision unit="m" decimalDigits="1"/>
+						<compare gte="0" lte="100" flag="error"/>	
+					</number>					
+					<number type="real" name="tree_height_to_base">
+						<label type="instance">Bole height</label>
+						<precision unit="m" decimalDigits="1"/>	
+						<compare gte="0" lte="100" flag="error"/>						
+					</number>
+					<number type="real" name="base_length_tally_tree_bole">
+						<label type="instance">B Base length</label>
+						<precision unit="m" decimalDigits="1"/>	
+						<compare gte="0" lte="100" flag="error"/>							
+					</number>					
+					<text name="comments_tally_tree">
+						<label type="instance">Comments</label>
+					</text>
+				</entity>
+				<entity name="juvenile_tree" multiple="true" ui:tab="juvenile_tree">
+					<label type="instance">Juvenile trees</label>
+					<number type="integer" name="juvenile_id">
+						<label type="instance">Tree ID</label>
+					</number>
+					<number type="integer" name="species_id_juvenile_tree">
+						<label type="instance">Species ID</label>
+					</number>
+					<code name="species_name_juvenile_tree" list="species_name">
+						<label type="instance">Species name</label>
+					</code>
+					<number type="real" name="tree_diameter_juvenile_tree">
+						<label type="instance">Tree diameter</label>
+					</number>
+					<number type="integer" name="pom_juvenile_tree">
+						<label type="instance">pom</label>
+					</number>					
+					<number type="real" name="tree_height_juvenile_tree">
+						<label type="instance">Tree height</label>
+					</number>
+					<number type="real" name="base_length_juvenile_tree">
+						<label type="instance">Base length</label>
+						<precision unit="m" decimalDigits="1"/>	
+						<compare gte="0" lte="100" flag="error"/>								
+					</number>					
+					<text name="comments_juvenile_tree">
+						<label type="instance">Comments</label>
+					</text>
+				</entity>				
+				<entity name="seedling_shrub" multiple="true" ui:tab="seedling_shrub">
+					<label type="instance">Seedlings and shrubs</label>
+					<number type="integer" name="seedling_id">
+						<label type="instance">Tree ID</label>
+					</number>					
+					<number type="integer" name="species_id_seedling_shrub">
+						<label type="instance">Species ID</label>
+					</number>
+					<code name="species_name_seedling_shrub" list="species_name">
+						<label type="instance">Species name</label>
+					</code>
+					<number type="real" name="tree_diameter_seedling_shrub">
+						<label type="instance">Tree diameter</label>
+						<precision unit="m" decimalDigits="0"/>
+					</number>
+					<number type="real" name="tree_height_seedling_shrub">
+						<label type="instance">Tree height</label>
+						<precision unit="m" decimalDigits="1"/>	
+						<compare gte="0" lte="20" flag="error"/>		
+					</number>
+					<text name="comments_seedling_shrub">
+						<label type="instance">Comments</label>
+					</text>
+				</entity>
+				<entity name="standing_dead_wood" multiple="true" ui:tab="standing_dead_wood">
+					<label type="instance">Standing dead wood</label>
+					<number type="integer" name="standing_dead_tree_id">
+						<label type="instance">Tree ID</label>
+					</number>
+					<number type="integer" name="species_id_standing_dead_wood">
+						<label type="instance">Species ID</label>
+					</number>
+					<code name="species_name_code_standing_dead_wood" list="species_name">
+						<label type="instance">Species name</label>
+					</code>
+					<number type="real" name="tree_diameter_standing_dead_wood">
+						<label type="instance">Tree diameter</label>
+						<precision unit="cm" decimalDigits="1"/>
+						<compare gte="0" lte="700" flag="error"/>	
+					</number>
+					<number type="integer" name="pom_standing_dead_wood">
+						<label type="instance">pom</label>
+					</number>					
+					<number type="real" name="tree_height_standing_dead_wood">
+						<label type="instance">Tree height</label>
+						<precision unit="m" decimalDigits="1"/>
+						<compare gte="0" lte="100" flag="error"/>							
+					</number>
+					<number type="real" name="base_standing_dead_wood">
+						<label type="instance">Base length</label>
+						<precision unit="m" decimalDigits="1"/>
+						<compare gte="0" lte="100" flag="error"/>							
+					</number>					
+					<code name="decomposition_class_code_standing_dead_wood" list="decomposition_class">
+						<label type="instance">Decomposition class</label>
+					</code>					
+					<text name="comments_standing_dead_wood">
+						<label type="instance">Comments</label>
+					</text>
+				</entity>
+				<entity name="dead_wood" multiple="true" ui:tab="dead_wood">
+					<number type="real" name="partide_number">
+						<label type="instance">Particle number</label>
+					</number>
+					<number type="integer" name="species_id_dead_wood">
+						<label type="instance">Species ID</label>
+					</number>
+					<code name="species_name_dead_wood" list="species_name">
+						<label type="instance">Species name</label>
+					</code>
+					<number type="real" name="tree_diameter_dead_wood">
+						<label type="instance">Diameter at base</label>
+					</number>
+					<number type="real" name="tip_diameter_dead_wood">
+						<label type="instance">Diameter at tip</label>
+					</number>
+					<number type="real" name="length_seedling_shrub">
+						<label type="instance">Length</label>
+					</number>
+					<code name="decomposition_stage_code_dead_wood" list="decomposition_stage">
+						<label type="instance">Decomposition class</label>
+					</code>					
+				</entity>
+				<entity name="non_tree_biomass" multiple="true" ui:tab="non_tree_biomass">
+					<number type="real" name="non_tree_biomass_sample_number">
+						<label type="instance">Sample number</label>
+					</number>
+					<number type="integer" name="non_tree_weight">
+						<label type="instance">Biomass weight gr</label>
+					</number>
+					<number type="integer" name="non_tree_subs_weight">
+						<label type="instance">Subsample biomass weight gr</label>
+					</number>					
+				</entity>
+				<entity name="litter" multiple="true" ui:tab="litter">
+					<number type="real" name="litter_sample_number">
+						<label type="instance">Sample number</label>
+					</number>
+					<number type="integer" name="litter_weight">
+						<label type="instance">Litter weight gr</label>
+					</number>
+					<number type="integer" name="non_tree_subs_weight">
+						<label type="instance">Subsample litter weight gr</label>
+					</number>					
+				</entity>
+				<number type="integer" name="soil_sample_number" multiple="true" ui:tab="soil">
+					<label type="instance">Soil sample number</label>
+				</number>							
+            </entity>       
+        </entity>
+    </schema>
+</survey>
