@@ -68,5 +68,10 @@
 		      	</tabs>
 			</tabDefinition>
         </flex>
+        <languages>
+            <languageCode>eng</languageCode>
+            <languageCode>spa</languageCode>
+            <languageCode>fra</languageCode>
+        </languages>
     </configuration>
 </root>

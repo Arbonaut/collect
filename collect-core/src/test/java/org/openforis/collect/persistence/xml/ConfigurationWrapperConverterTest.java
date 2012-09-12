@@ -8,10 +8,6 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.List;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.openforis.collect.model.LanguageConfiguration;
 import org.openforis.collect.model.ui.UIConfiguration;
 import org.openforis.collect.model.ui.UITabDefinition;
@@ -23,26 +19,14 @@ import org.simpleframework.xml.convert.Registry;
 import org.simpleframework.xml.convert.RegistryStrategy;
 import org.simpleframework.xml.core.Persister;
 import org.simpleframework.xml.strategy.Strategy;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.transaction.TransactionConfiguration;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author S. Ricci
  */
-@RunWith( SpringJUnit4ClassRunner.class )
-@ContextConfiguration( locations = {"classpath:test-context.xml"} )
-@TransactionConfiguration(defaultRollback=true)
-@Transactional
 public class ConfigurationWrapperConverterTest {
 	//private final Log log = LogFactory.getLog(ConfigurationDaoIntegrationTest.class);
 	
-	@Before
-	public void before() throws Exception {
-	}
-	
-	@Test
+	//@Test
 	public void test() throws Exception  {
 		Registry registry = new Registry();
 		Strategy strategy = new RegistryStrategy(registry);
@@ -73,11 +57,6 @@ public class ConfigurationWrapperConverterTest {
 			}
 		}
 	}
-	
-	@After
-	public void after() throws Exception {
-	}
-
 	
 	public static class SimpleObject {
 		

@@ -3,8 +3,11 @@
  */
 package org.openforis.collect.persistence.xml;
 
+import java.util.List;
+
 import org.openforis.collect.model.LanguageConfiguration;
 import org.openforis.collect.model.ui.UIConfiguration;
+import org.openforis.idm.metamodel.Configuration;
 import org.openforis.idm.metamodel.ConfigurationWrapper;
 import org.openforis.idm.metamodel.xml.ConfigurationWrapperConverter;
 import org.simpleframework.xml.core.Persister;
@@ -15,6 +18,7 @@ import org.simpleframework.xml.stream.OutputNode;
  * @author S. Ricci
  *
  */
+@Deprecated
 public class CollectConfigurationWrapperConverter implements
 		ConfigurationWrapperConverter<ConfigurationWrapper> {
 
@@ -51,7 +55,14 @@ public class CollectConfigurationWrapperConverter implements
 	@Override
 	public void write(OutputNode node, ConfigurationWrapper value)
 			throws Exception {
-		// TODO Auto-generated method stub
+		Persister persister = new Persister();
+		List<Configuration> configurations = value.getConfigurations();
+		for (Configuration configuration : configurations) {
+			if ( configuration instanceof UIConfiguration ) {
+				OutputNode child = node.getChild(FLEX_ELEMENT_NAME);
+				
+			}
+		}
 		
 	}
 }
