@@ -6,26 +6,22 @@ package org.openforis.collect.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
-
 import org.openforis.idm.metamodel.Configuration;
 import org.openforis.idm.metamodel.Languages;
 import org.openforis.idm.util.CollectionUtil;
+import org.simpleframework.xml.ElementList;
+import org.simpleframework.xml.Order;
+import org.simpleframework.xml.Root;
 
 /**
  * @author S. Ricci
  *
  */
-@XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "", propOrder = { "tabDefinitions" })
-@XmlRootElement(name = "language")
+@Order(elements = { "languageCode" })
+@Root(name = "languages")
 public class LanguageConfiguration implements Configuration {
 
-	@XmlElement(name = "languageCode")
+	@ElementList(entry = "languageCode", inline = true)
 	private List<String> languageCodes;
 
 	public List<String> getLanguageCodes() {

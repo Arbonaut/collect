@@ -1,18 +1,21 @@
 package org.openforis.collect.persistence.xml;
 
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 
-import java.io.BufferedReader;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.openforis.collect.model.LanguageConfiguration;
+import org.openforis.collect.model.ui.UIConfiguration;
+import org.openforis.collect.model.ui.UITabDefinition;
+import org.openforis.idm.metamodel.Configuration;
 import org.openforis.idm.metamodel.ConfigurationWrapper;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.convert.Convert;
@@ -50,6 +53,25 @@ public class ConfigurationWrapperConverterTest {
 		InputStream is = testXmlFileUrl.openStream();
 		SimpleObject simpleObject = persister.read(SimpleObject.class, is, false);
 		assertNotNull(simpleObject);
+		ConfigurationWrapper configurationWrapper = simpleObject.getConfiguration();
+		assertNotNull(configurationWrapper);
+		List<Configuration> configurations = configurationWrapper.getConfigurations();
+		assertEquals(2, configurations.size());
+		for (Configuration configuration : configurations) {
+			if ( configuration instanceof UIConfiguration ) {
+				UITabDefinition tabDefinition = ((UIConfiguration) configuration).getTabDefinition("cluster");
+				assertNotNull(tabDefinition);
+			} else if ( configuration instanceof LanguageConfiguration ) {
+				List<String> languageCodes = ((LanguageConfiguration) configuration).getLanguageCodes();
+				assertNotNull(languageCodes);
+				assertEquals(3, languageCodes.size());
+				assertEquals("eng", languageCodes.get(0));
+				assertEquals("spa", languageCodes.get(1));
+				assertEquals("fra", languageCodes.get(2));
+			} else {
+				fail("Unexpected configuration type: " + configuration.getClass().getSimpleName());
+			}
+		}
 	}
 	
 	@After
