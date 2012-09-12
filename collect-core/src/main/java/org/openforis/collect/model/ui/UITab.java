@@ -1,10 +1,8 @@
 package org.openforis.collect.model.ui;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlTransient;
-import javax.xml.bind.annotation.XmlType;
+import org.simpleframework.xml.Element;
+import org.simpleframework.xml.Order;
+import org.simpleframework.xml.Transient;
 
 /**
  * 
@@ -12,16 +10,17 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 
-@XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "", propOrder = { "name", "label", "tabs" })
+//@XmlAccessorType(XmlAccessType.FIELD)
+//@XmlType(name = "", propOrder = { "name", "label", "tabs" })
+@Order(attributes = {"name"}, elements = {"label","tabs"})
 public class UITab extends UITabsGroup {
 
 	private static final long serialVersionUID = 1L;
 
-	@XmlElement(name = "label")
+	@Element(name = "label")
 	private String label;
 
-	@XmlTransient
+	@Transient
 	private UITabDefinition tabDefinition;
 	
 	public String getLabel() {

@@ -5,28 +5,16 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
 import javax.xml.namespace.QName;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.openforis.idm.metamodel.Configuration;
 import org.openforis.idm.metamodel.EntityDefinition;
 import org.openforis.idm.metamodel.NodeDefinition;
-import org.openforis.idm.metamodel.xml.ConfigurationAdapter;
 import org.openforis.idm.util.CollectionUtil;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
+import org.simpleframework.xml.ElementList;
+import org.simpleframework.xml.Order;
+import org.simpleframework.xml.Root;
 
 
 /**
@@ -34,9 +22,11 @@ import org.w3c.dom.Element;
  * @author S. Ricci
  * 
  */
-@XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "", propOrder = { "tabDefinitions" })
-@XmlRootElement(name = "flex")
+//@XmlAccessorType(XmlAccessType.FIELD)
+//@XmlType(name = "", propOrder = { "tabDefinitions" })
+//@XmlRootElement(name = "flex")
+@Order(elements = {"tabDefinition"})
+@Root(name = "flex")
 public class UIConfiguration implements Configuration, Serializable {
 
 	public static final QName TAB_DEFINITION_ANNOTATION = new QName("http://www.openforis.org/collect/3.0/ui", "tabDefinition");
@@ -44,7 +34,8 @@ public class UIConfiguration implements Configuration, Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
-	@XmlElement(name = "tabDefinition", type = UITabDefinition.class)
+//	@XmlElement(name = "tabDefinition", type = UITabDefinition.class)
+	@ElementList(entry = "tabDefinition", inline = true, type = UITabDefinition.class)
 	private List<UITabDefinition> tabDefinitions;
 
 	public List<UITabDefinition> getTabDefinitions() {
@@ -156,47 +147,47 @@ public class UIConfiguration implements Configuration, Serializable {
 			return false;
 		return true;
 	}
-
-	public static class UIConfigurationAdapter implements ConfigurationAdapter<UIConfiguration> {
-
-		private static DocumentBuilder documentBuilder;
-		
-		static{
-			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-			factory.setNamespaceAware(true);
-			try {
-				documentBuilder = factory.newDocumentBuilder();
-			} catch (ParserConfigurationException e) {
-				e.printStackTrace();
-			}
-		}
-		
-		@Override
-		public UIConfiguration unmarshal(Element elem) {
-			try {
-				JAXBContext jc = JAXBContext.newInstance(UIConfiguration.class);
-				Unmarshaller unmarshaller = jc.createUnmarshaller();
-				UIConfiguration configuration = (UIConfiguration) unmarshaller.unmarshal(elem);
-				return configuration;
-			} catch (JAXBException e) {
-				throw new RuntimeException("Unable to marshal the UI configuration: "+ e.getMessage(), e);
-			}
-		}
-
-		@Override
-		public Element marshal(UIConfiguration config) {
-			try {
-				JAXBContext jc = JAXBContext.newInstance(UIConfiguration.class);
-				Marshaller marshaller = jc.createMarshaller();
-				Document document = documentBuilder.newDocument();
-				marshaller.marshal(config, document);
-				Element documentElement = document.getDocumentElement();
-				return documentElement;
-			} catch (JAXBException e) {
-				throw new RuntimeException("Unable to marshal the UI configuration: "+ e.getMessage(), e);
-			}
-		}
-
-	}
+//
+//	public static class UIConfigurationAdapter implements ConfigurationAdapter<UIConfiguration> {
+//
+//		private static DocumentBuilder documentBuilder;
+//		
+//		static{
+//			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+//			factory.setNamespaceAware(true);
+//			try {
+//				documentBuilder = factory.newDocumentBuilder();
+//			} catch (ParserConfigurationException e) {
+//				e.printStackTrace();
+//			}
+//		}
+//		
+//		@Override
+//		public UIConfiguration unmarshal(Element elem) {
+//			try {
+//				JAXBContext jc = JAXBContext.newInstance(UIConfiguration.class);
+//				Unmarshaller unmarshaller = jc.createUnmarshaller();
+//				UIConfiguration configuration = (UIConfiguration) unmarshaller.unmarshal(elem);
+//				return configuration;
+//			} catch (JAXBException e) {
+//				throw new RuntimeException("Unable to marshal the UI configuration: "+ e.getMessage(), e);
+//			}
+//		}
+//
+//		@Override
+//		public Element marshal(UIConfiguration config) {
+//			try {
+//				JAXBContext jc = JAXBContext.newInstance(UIConfiguration.class);
+//				Marshaller marshaller = jc.createMarshaller();
+//				Document document = documentBuilder.newDocument();
+//				marshaller.marshal(config, document);
+//				Element documentElement = document.getDocumentElement();
+//				return documentElement;
+//			} catch (JAXBException e) {
+//				throw new RuntimeException("Unable to marshal the UI configuration: "+ e.getMessage(), e);
+//			}
+//		}
+//
+//	}
 
 }

@@ -174,7 +174,7 @@ public class SurveyDao extends JooqDaoSupport {
 			SurveyMarshaller sm = bindingContext.createSurveyMarshaller();
 			sm.setIndent(true);
 			sm.marshal(survey, os);
-		} catch (IOException e) {
+		} catch (Exception e) {
 			throw new SurveyImportException("Error marshalling survey", e);
 		}
 	}

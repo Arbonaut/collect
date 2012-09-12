@@ -4,28 +4,25 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
-import javax.xml.bind.annotation.XmlTransient;
-
 import org.openforis.idm.util.CollectionUtil;
+import org.simpleframework.xml.Attribute;
+import org.simpleframework.xml.ElementList;
+import org.simpleframework.xml.Transient;
 
 /**
  * 
  * @author S. Ricci
  *
  */
-@XmlTransient
+@Transient
 public abstract class UITabsGroup implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
-	@XmlAttribute(name = "name")
+	@Attribute(name = "name")
 	protected String name;
 
-	@XmlElementWrapper(name = "tabs")
-	@XmlElement(name = "tab", type = UITab.class)
+	@ElementList(name = "tabs", entry = "tab", type = UITab.class, required = false)
 	protected List<UITab> tabs;
 
 	public String getName() {
