@@ -31,6 +31,9 @@ import org.w3c.dom.Element;
  */
 public class CollectConfigurationAdapter implements ConfigurationAdapter<Configuration> {
 
+	private static final String LANGUAGES_ELEMENT_NAME = "languages";
+	private static final String FLEX_ELEMENT_NAME = "flex";
+
 	private Persister persister;
 
 	public CollectConfigurationAdapter() {
@@ -44,9 +47,9 @@ public class CollectConfigurationAdapter implements ConfigurationAdapter<Configu
 		String nodeName = elem.getNodeName();
 		InputStream is = toInputStream(elem);
 		Class<? extends Configuration> configurationClass = null;
-		if ( "flex".equals(nodeName) ) {
+		if ( FLEX_ELEMENT_NAME.equals(nodeName) ) {
 			configurationClass = UIConfiguration.class;
-		} else if ( "languages".equals(nodeName) ) {
+		} else if ( LANGUAGES_ELEMENT_NAME.equals(nodeName) ) {
 			configurationClass = LanguageConfiguration.class;
 		}
 		if ( configurationClass != null ) {
