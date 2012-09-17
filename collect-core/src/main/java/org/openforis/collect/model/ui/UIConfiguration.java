@@ -22,9 +22,6 @@ import org.simpleframework.xml.Root;
  * @author S. Ricci
  * 
  */
-//@XmlAccessorType(XmlAccessType.FIELD)
-//@XmlType(name = "", propOrder = { "tabDefinitions" })
-//@XmlRootElement(name = "flex")
 @Order(elements = {"tabDefinition"})
 @Root(name = "flex")
 public class UIConfiguration implements Configuration, Serializable {
@@ -34,8 +31,7 @@ public class UIConfiguration implements Configuration, Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
-//	@XmlElement(name = "tabDefinition", type = UITabDefinition.class)
-	@ElementList(entry = "tabDefinition", inline = true, type = UITabDefinition.class)
+	@ElementList(entry = "tabDefinition", inline = true, required = false)
 	private List<UITabDefinition> tabDefinitions;
 
 	public List<UITabDefinition> getTabDefinitions() {

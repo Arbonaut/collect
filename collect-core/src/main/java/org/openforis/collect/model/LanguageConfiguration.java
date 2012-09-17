@@ -21,7 +21,7 @@ import org.simpleframework.xml.Root;
 @Root(name = "languages")
 public class LanguageConfiguration implements Configuration {
 
-	@ElementList(entry = "languageCode", inline = true)
+	@ElementList(entry = "languageCode", inline = true, required = false)
 	private List<String> languageCodes;
 
 	public List<String> getLanguageCodes() {

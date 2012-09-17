@@ -56,7 +56,7 @@ public class CollectConfigurationAdapter implements ConfigurationAdapter<Configu
 			try {
 				configuration = persister.read(configurationClass, is);
 			} catch (Exception e) {
-				throw new RuntimeException("Cannot parse configuration: ");
+				throw new RuntimeException("Cannot parse ui configuration", e);
 			}
 		}
 		return configuration;
@@ -94,8 +94,8 @@ public class CollectConfigurationAdapter implements ConfigurationAdapter<Configu
 
 	private static InputStream toInputStream(Element elem) {
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-		Source xmlSource = new DOMSource(elem);
 		Result outputTarget = new StreamResult(outputStream);
+		Source xmlSource = new DOMSource(elem);
 		try {
 			TransformerFactory tranformerFactory = TransformerFactory.newInstance();
 			Transformer transformer = tranformerFactory.newTransformer();
