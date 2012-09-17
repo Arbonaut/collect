@@ -31,7 +31,7 @@ public class UIConfiguration implements Configuration, Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
-	@ElementList(entry = "tabDefinition", inline = true, required = false)
+	@ElementList(entry = "tabDefinition", inline = true)
 	private List<UITabDefinition> tabDefinitions;
 
 	public List<UITabDefinition> getTabDefinitions() {
