@@ -1,0 +1,35 @@
+<zk>
+	<vlayout
+		id="nodeFormContainer"
+		apply="org.zkoss.bind.BindComposer"
+		viewModel="@id('vm') @init(vm)"
+		validationMessages="@id('vmsgs')"
+		form="@id('fx') 
+			@init(vm.tempFormObject)
+			@load(vm.formObject) 
+			@save(vm.formObject, before='applyChanges')
+			@validator('org.openforis.collect.designer.form.validator.AttributeDefinitionFormValidator')">
+
+		<include src="schema_edit/attribute_common.zul" />
+		
+		<grid>
+			<columns>
+				<column label="" width="150px" />
+				<column label="" width="300px" />
+			</columns>
+			<rows>
+				<row>
+					<label value="${labels.survey.schema.attribute.bool.type_label}:" />
+					<radiogroup selectedIndex="@bind(fx.typeIndex)">
+						<radio id="threeStateRadioButton" 
+							label="${labels.survey.schema.attribute.bool.type.threeState}"
+							value="threeState" />
+						<radio id="affirmativeOnlyRadioButton" 
+							label="${labels.survey.schema.attribute.bool.type.affirmativeOnly}"
+							value="affirmativeOnly" />
+					</radiogroup>
+				</row>
+			</rows>
+		</grid>
+	</vlayout>
+</zk>

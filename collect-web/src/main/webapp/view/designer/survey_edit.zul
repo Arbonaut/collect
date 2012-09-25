@@ -1,0 +1,48 @@
+<?page title="Openforis Collect Designer - Edit Survey" contentType="text/html;charset=UTF-8"?>
+<?init class="org.zkoss.zk.ui.util.Composition" arg0="layouts/template.zul"?>
+<zk>
+	<vbox id="surveyEditBox"
+		height="100%" width="100%" 
+		self="@define(content)"
+		apply="org.zkoss.bind.BindComposer"
+		viewModel="@id('vm') @init('org.openforis.collect.designer.viewmodel.SurveyEditVM')">
+		
+		<vlayout>
+			<!-- language selector -->
+			<hlayout width="100%" style="text-align: right;">
+				<label value="${labels.survey.selected_language}:" />
+				<radiogroup model="@load(vm.availableLanguages)"
+					selectedItem="@bind(vm.selectedLanguageCode)">
+					<template name="model">
+						<radio label="@load(each)" value="@load(each)" />
+					</template>
+				</radiogroup>
+			</hlayout>
+			<!-- main tabs -->
+			<tabbox id="tb" height="500px" width="100%">
+			    <tabs id="tabs">
+			        <tab id="surveyTab" label="${labels.survey.$}" />
+			        <tab id="schemaTab" label="${labels.survey.schema.$}" />
+			    </tabs>
+			    <tabpanels height="100%" width="100%">
+			        <tabpanel height="100%" width="100%">
+			        	<include src="survey_edit_info.zul" />
+			        </tabpanel>
+			        <tabpanel height="100%" width="100%">
+			        	<include src="schema_edit/schema.zul" />
+			        </tabpanel>
+			    </tabpanels>
+			</tabbox>
+		</vlayout>
+		
+		<label visible="@load(empty vmsgs)"
+			value="@load(empty vmsgs ? labels.survey.successfully_saved : '', before='save')" />
+		
+		<hbox spacing="20px" align="center">
+			<button label="Save" onClick="@command('save')" />
+				
+			<button label="Cancel" onClick="" self="@{action(cancel)}" />
+		</hbox>
+			
+	</vbox>
+</zk>

@@ -1,0 +1,130 @@
+<zk>
+	<borderlayout id="codeListsManagerContainer"
+			apply="org.zkoss.bind.BindComposer"
+			viewModel="@id('vm') @init('org.openforis.collect.designer.viewmodel.SurveyCodeListsEditVM')"
+			validationMessages="@id('vmsgs')">
+		<west>
+			<vbox>
+		        <listbox id="itemsListBox"
+		        	selectedItem="@bind(vm.selectedItem)"
+		        	model="@load(vm.items)"
+		        	onSelect="@command('selectionChanged', selectedItem=self.selectedItem.value)"
+		        	height="200px"
+		        	width="200px">
+		        	<listhead>
+						<listheader label="" width="150px" />
+						<listheader label="" width="50px" />
+					</listhead>
+		            <template name="model">
+		                <listitem>
+		                    <listcell label="@load(each.name)" />
+		                    <listcell>
+		                    	<button image="/assets/images/cross-small.png"
+		                     		onClick="@command('deleteItem', item=each)" />
+		                    </listcell>
+		                </listitem>
+		            </template>
+		        </listbox>
+		        
+		        <button label="${labels.global.add_item}" onClick="@command('newItem') @global-command('codeListsUpdated')" />
+		    </vbox>
+	    </west>
+	   	<center>
+	        <div 
+	        	visible="@load(vm.editingItem)"
+				validationMessages="@id('vmsgs')"
+				form="@id('fx') 
+					@load(vm.formObject) @save(vm.formObject, before='applyChanges')
+					@validator('org.openforis.collect.designer.form.validator.CodeListFormValidator')"
+				width="100%">
+				<grid>
+					<columns>
+						<column label="" width="150px" />
+						<column label="" />
+					</columns>
+					<rows>
+						<row>
+							<label value="${labels.global.item.name}:" />
+							<cell>
+								<textbox width="150px" value="@bind(fx.name)" onChange="@command('applyChanges')" />
+								<label class="error" value="@load(vmsgs['name'])" />
+							</cell>
+						</row>
+						<row>
+							<label value="${labels.survey.code_list.item_label}:" />
+							<cell>
+								<textbox width="150px" value="@bind(fx.itemLabel)" onChange="@command('applyChanges')" />
+								<label class="error" value="@load(vmsgs['itemLabel'])" />
+							</cell>
+						</row>
+						<row>
+							<label value="${labels.survey.code_list.list_label}:" />
+							<cell>
+								<textbox width="150px" value="@bind(fx.listLabel)" onChange="@command('applyChanges')" />
+								<label class="error" value="@load(vmsgs['listLabel'])" />
+							</cell>
+						</row>
+						<row>
+							<label value="${labels.global.item.since_version}:" />
+							<cell>
+								<listbox width="150px"
+				                    model="@load(vm.versionsForCombo)" 
+				                    selectedItem="@bind(fx.sinceVersion)"
+				                    onSelect="@command('applyChanges')"
+				                    mold="select">
+				                    <template name="model">
+				                        <listitem label="@load(each.name)" />
+				                    </template>
+				                </listbox>
+			                	<label class="error" value="@load(vmsgs['sinceVersion'])" />
+							</cell>
+			            </row>
+			            <row>
+							<label value="${labels.global.item.deprecated_version}:" />
+							<cell>
+								<listbox width="150px"
+				                    model="@load(vm.versionsForCombo)" 
+				                    selectedItem="@bind(fx.deprecatedVersion)"
+				                    onSelect="@command('applyChanges')"
+				                    mold="select">
+				                    <template name="model">
+				                        <listitem label="@load(each.name)" />
+				                    </template>
+				                </listbox>
+				                <label class="error" value="@load(vmsgs['deprecatedVersion'])" />
+							</cell>
+			            </row>
+			            <row>
+			            	<label value="${labels.survey.code_list.type.$}:" />
+							<radiogroup selectedItem="@bind(fx.type)">
+								<radio label="${labels.survey.code_list.type.flat}"
+									value="FLAT" />
+								<radio label="${labels.survey.code_list.type.hierarchical}"
+									value="HIERACHICAL" />
+							</radiogroup>
+			            </row>
+					</rows>
+				</grid>
+				
+				<hlayout height="100%">
+					<hlayout children="@load(vm.listLevels)"
+						height="100%">
+						<template name="children">
+							<vlayout width="100px" height="100%">
+								<textbox value="@bind(each.name)" />
+								<listbox model="@load(vm.itemsPerLevel[forEachStatus.index])"
+									height="100%">
+									<template name="model">
+										<listitem label="@load(each.code)" />
+									</template>
+								</listbox>
+							</vlayout>
+						</template>
+					</hlayout>
+				 	<button label="${labels.survey.code_list.add_level}" 
+				 		onClick="@command('addLevel')" />
+				</hlayout>
+			</div>
+		</center>
+	</borderlayout>
+</zk>
