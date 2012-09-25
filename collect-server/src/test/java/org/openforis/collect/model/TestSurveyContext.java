@@ -1,4 +1,4 @@
-package org.openforis.collect;
+package org.openforis.collect.model;
 
 import org.openforis.idm.metamodel.ExternalCodeListProvider;
 import org.openforis.idm.metamodel.SurveyContext;

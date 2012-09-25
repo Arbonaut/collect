@@ -6,6 +6,7 @@ import java.net.URL;
 
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.openforis.collect.model.TestSurveyContext;
 import org.openforis.idm.metamodel.Survey;
 import org.openforis.idm.metamodel.xml.IdmlBindingContext;
 import org.openforis.idm.metamodel.xml.InvalidIdmlException;

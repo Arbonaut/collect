@@ -1,10 +1,10 @@
 /**
  * 
  */
-package org.openforis.collect;
+package org.openforis.collect.model;
 
 import org.openforis.idm.metamodel.validation.LookupProvider;
-import org.openforis.idm.model.expression.LookupFunctionTest;
+import org.openforis.collect.model.expression.LookupFunctionTest;
 
 /**
  * @author M. Togna
