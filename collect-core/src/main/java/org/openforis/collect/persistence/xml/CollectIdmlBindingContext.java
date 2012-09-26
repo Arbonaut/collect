@@ -1,7 +1,5 @@
 package org.openforis.collect.persistence.xml;
 
-import javax.xml.bind.annotation.XmlRootElement;
-
 import org.openforis.collect.model.CollectSurvey;
 import org.openforis.idm.metamodel.Configuration;
 import org.openforis.idm.metamodel.SurveyContext;
@@ -10,8 +8,9 @@ import org.openforis.idm.metamodel.xml.IdmlBindingContext;
 
 /**
  * @author G. Miceli
+ * @author K. Waga
  */
-@XmlRootElement(name = "survey")
+
 public class CollectIdmlBindingContext extends IdmlBindingContext {
 	
 	public CollectIdmlBindingContext(SurveyContext surveyContext) {

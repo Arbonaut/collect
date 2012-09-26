@@ -5,8 +5,6 @@ package org.openforis.collect.model;
 
 import java.util.List;
 
-import javax.xml.bind.annotation.XmlRootElement;
-
 import org.openforis.collect.model.ui.UIConfiguration;
 import org.openforis.idm.metamodel.Configuration;
 import org.openforis.idm.metamodel.Survey;
@@ -14,9 +12,10 @@ import org.openforis.idm.metamodel.Survey;
 /**
  * @author M. Togna
  * @author S. Ricci
+ * @author K. Waga
  * 
  */
-@XmlRootElement(name = "survey")
+
 public class CollectSurvey extends Survey {
 	private static final long serialVersionUID = 1L;
 
