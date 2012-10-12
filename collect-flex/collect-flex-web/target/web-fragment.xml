@@ -1,0 +1,82 @@
+
+<!--
+Automatically created by Apache Jakarta Tomcat JspC.
+Place this fragment in the web.xml before all icon, display-name,
+description, distributable, and context-param elements.
+-->
+
+    <servlet>
+        <servlet-name>jsp.index_jsp</servlet-name>
+        <servlet-class>jsp.index_jsp</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>jsp.WEB_002dINF.view.jsp.accessDenied_jsp</servlet-name>
+        <servlet-class>jsp.WEB_002dINF.view.jsp.accessDenied_jsp</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>jsp.WEB_002dINF.view.jsp.error_jsp</servlet-name>
+        <servlet-class>jsp.WEB_002dINF.view.jsp.error_jsp</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>jsp.WEB_002dINF.view.jsp.exitUser_jsp</servlet-name>
+        <servlet-class>jsp.WEB_002dINF.view.jsp.exitUser_jsp</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>jsp.WEB_002dINF.view.jsp.importSurvey_jsp</servlet-name>
+        <servlet-class>jsp.WEB_002dINF.view.jsp.importSurvey_jsp</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>jsp.WEB_002dINF.view.jsp.index_jsp</servlet-name>
+        <servlet-class>jsp.WEB_002dINF.view.jsp.index_jsp</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>jsp.WEB_002dINF.view.jsp.login_jsp</servlet-name>
+        <servlet-class>jsp.WEB_002dINF.view.jsp.login_jsp</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>jsp.index_jsp</servlet-name>
+        <url-pattern>/index.jsp</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>jsp.WEB_002dINF.view.jsp.accessDenied_jsp</servlet-name>
+        <url-pattern>/WEB-INF/view/jsp/accessDenied.jsp</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>jsp.WEB_002dINF.view.jsp.error_jsp</servlet-name>
+        <url-pattern>/WEB-INF/view/jsp/error.jsp</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>jsp.WEB_002dINF.view.jsp.exitUser_jsp</servlet-name>
+        <url-pattern>/WEB-INF/view/jsp/exitUser.jsp</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>jsp.WEB_002dINF.view.jsp.importSurvey_jsp</servlet-name>
+        <url-pattern>/WEB-INF/view/jsp/importSurvey.jsp</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>jsp.WEB_002dINF.view.jsp.index_jsp</servlet-name>
+        <url-pattern>/WEB-INF/view/jsp/index.jsp</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>jsp.WEB_002dINF.view.jsp.login_jsp</servlet-name>
+        <url-pattern>/WEB-INF/view/jsp/login.jsp</url-pattern>
+    </servlet-mapping>
+
+<!--
+All session-config, mime-mapping, welcome-file-list, error-page, taglib,
+resource-ref, security-constraint, login-config, security-role,
+env-entry, and ejb-ref elements should follow this fragment.
+-->
