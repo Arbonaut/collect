@@ -110,8 +110,8 @@ public class UIOptions implements ApplicationOptions, Serializable {
 	}
 
 	public UITabSet getTabSet(EntityDefinition rootEntityDefn) {
-		String tabDefnName = rootEntityDefn.getAnnotation(Annotation.TAB_SET.getQName());
-		UITabSet tabSet = getTabSet(tabDefnName);
+		String tabSetName = rootEntityDefn.getAnnotation(Annotation.TAB_SET.getQName());
+		UITabSet tabSet = getTabSet(tabSetName);
 		return tabSet;
 	}
 	
@@ -166,6 +166,11 @@ public class UIOptions implements ApplicationOptions, Serializable {
 	
 	public void removeTabAssociation(NodeDefinition nodeDefn) {
 		nodeDefn.setAnnotation(Annotation.TAB_NAME.getQName(), null);
+	}
+	
+	public boolean isAssociatedToTab(NodeDefinition nodeDefn) {
+		UITab tab = getTab(nodeDefn);
+		return tab != null;
 	}
 	
 	public Layout getLayout(EntityDefinition node) {

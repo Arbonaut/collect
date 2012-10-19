@@ -6,7 +6,7 @@ package org.openforis.collect.designer.viewmodel;
 import java.util.List;
 
 import org.openforis.collect.designer.form.CodeListItemFormObject;
-import org.openforis.collect.designer.form.ItemFormObject;
+import org.openforis.collect.designer.form.SurveyObjectFormObject;
 import org.openforis.idm.metamodel.CodeListItem;
 import org.zkoss.bind.BindUtils;
 import org.zkoss.bind.annotation.Command;
@@ -18,7 +18,7 @@ import org.zkoss.bind.annotation.Init;
  * @author S. Ricci
  *
  */
-public class SurveyCodeListItemEditVM extends SurveyItemEditVM<CodeListItem> {
+public class CodeListItemVM extends SurveyObjectBaseVM<CodeListItem> {
 
 	@Init
 	public void init(@ExecutionArgParam("item") CodeListItem item) {
@@ -27,12 +27,12 @@ public class SurveyCodeListItemEditVM extends SurveyItemEditVM<CodeListItem> {
 	
 	@Override
 	protected void addNewItemToSurvey() {
-		//do nothing
+		//do nothing, performed by CodeListVM
 	}
 	
 	@Override
 	protected void deleteItemFromSurvey(CodeListItem item) {
-		//do nothing
+		//do nothing, performed by CodeListVM
 	}
 	
 	@Override
@@ -47,14 +47,20 @@ public class SurveyCodeListItemEditVM extends SurveyItemEditVM<CodeListItem> {
 	}
 	
 	@Override
-	protected ItemFormObject<CodeListItem> createFormObject() {
+	protected CodeListItem createItemInstance() {
+		//items instantiated in CodeListEditVM
+		return null;
+	}
+	
+	@Override
+	protected SurveyObjectFormObject<CodeListItem> createFormObject() {
 		return new CodeListItemFormObject();
 	}
 
 	@Command
 	public void close() {
 		if ( checkCurrentFormValid() ) {
-			BindUtils.postGlobalCommand(null, null, SurveyCodeListsEditVM.CLOSE_CODE_LIST_ITEM_POP_UP_COMMAND, null);
+			BindUtils.postGlobalCommand(null, null, CodeListsVM.CLOSE_CODE_LIST_ITEM_POP_UP_COMMAND, null);
 		}
 	}
 	

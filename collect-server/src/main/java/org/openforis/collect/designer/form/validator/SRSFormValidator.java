@@ -1,6 +1,6 @@
 package org.openforis.collect.designer.form.validator;
 
-import org.openforis.collect.designer.viewmodel.SurveyItemEditVM;
+import org.openforis.collect.designer.viewmodel.SurveyObjectBaseVM;
 import org.openforis.collect.model.CollectSurvey;
 import org.openforis.idm.metamodel.SpatialReferenceSystem;
 import org.zkoss.bind.ValidationContext;
@@ -31,7 +31,7 @@ public class SRSFormValidator extends FormValidator {
 	}
 
 	protected boolean validateIdUniqueness(ValidationContext ctx) {
-		SurveyItemEditVM<SpatialReferenceSystem> viewModel = getSurveyItemEditVM(ctx);
+		SurveyObjectBaseVM<SpatialReferenceSystem> viewModel = getSurveyItemEditVM(ctx);
 		SpatialReferenceSystem editedItem = viewModel.getEditedItem();
 		CollectSurvey survey = viewModel.getSurvey();
 		String id = (String) getValue(ctx, ID_FIELD);
@@ -45,12 +45,11 @@ public class SRSFormValidator extends FormValidator {
 		}
 	}
 	
-	protected SurveyItemEditVM<SpatialReferenceSystem> getSurveyItemEditVM(ValidationContext ctx) {
+	@SuppressWarnings("unchecked")
+	protected SurveyObjectBaseVM<SpatialReferenceSystem> getSurveyItemEditVM(ValidationContext ctx) {
 		Object vm = getVM(ctx);
-		if ( vm instanceof SurveyItemEditVM ) {
-			@SuppressWarnings("unchecked")
-			SurveyItemEditVM<SpatialReferenceSystem> viewModel = (SurveyItemEditVM<SpatialReferenceSystem>) vm;
-			return viewModel;
+		if ( vm instanceof SurveyObjectBaseVM ) {
+			return (SurveyObjectBaseVM<SpatialReferenceSystem>) vm;
 		} else {
 			throw new  IllegalStateException("Unexpected view model class: " + vm.getClass().getName());
 		}

@@ -40,11 +40,11 @@ import org.zkoss.zul.Treeitem;
  * @author S. Ricci
  *
  */
-public class SurveyLayoutEditVM extends SurveyEditBaseVM {
+public class SchemaLayoutVM extends SurveyBaseVM {
 
 	private static final String NODES_PER_TAB_CHANGED_GLOABAL_COMMAND = "nodesPerTabChanged";
 	
-	private UITabSet tabSet;
+	private UITabSet rootTabSet;
 	private SchemaTreeModel treeModel;
 	
 //	@Wire
@@ -71,44 +71,44 @@ public class SurveyLayoutEditVM extends SurveyEditBaseVM {
 	}
 	
 	@Command
-	@NotifyChange({"tabDefinition"})
+	@NotifyChange({"rootTabSet"})
 	public void nodeSelected(@BindingParam("node") Treeitem node) {
 		List<ModelVersion> versions = survey.getVersions();
 		setFormVersion(versions.isEmpty() ? null: versions.get(0));
-		UITabSet tabSet = extractTabDefinition(node);
+		UITabSet tabSet = getRootTabSet(node);
 		refreshTabSetLayoutPanel(tabSet, false);
-		this.tabSet = tabSet;
-		dispatchTabDefinitionChangedCommand();
+		this.rootTabSet = tabSet;
+		dispatchTabSetChangedCommand();
 	}
 
 	@Command
 	@NotifyChange({"nodes"})
 	public void formVersionChanged(@BindingParam("version") ModelVersion version) {
 		setFormVersion(version);
-		refreshTabSetLayoutPanel(this.tabSet, true);
+		refreshTabSetLayoutPanel(this.rootTabSet, true);
 		initTreeModel();
 		Map<String, Object> args = new HashMap<String, Object>();
 		args.put("version", version);
 		BindUtils.postGlobalCommand(null, null, "layoutFormVersionChanged", args);
 	}
 	
-	protected void dispatchTabDefinitionChangedCommand() {
+	protected void dispatchTabSetChangedCommand() {
 		Map<String, Object> args = new HashMap<String, Object>();
-		args.put("tabDefinition", tabSet);
-		BindUtils.postGlobalCommand(null, null, "tabDefinitionChanged", args);
+		args.put("tabSet", rootTabSet);
+		BindUtils.postGlobalCommand(null, null, "tabSetChanged", args);
 	}
 
 	protected void refreshTabSetLayoutPanel(UITabSet tabSet, boolean forceRefresh) {
 		if ( tabSet == null ) {
 			tabsGroupContainerInclude.setSrc(null);
-		} else if ( forceRefresh || this.tabSet != tabSet) {
+		} else if ( forceRefresh || this.rootTabSet != tabSet) {
 			tabsGroupContainerInclude.setSrc(null); //workaround: include is not refreshed otherwise
-			tabsGroupContainerInclude.setDynamicProperty("tabsGroup", tabSet);
+			tabsGroupContainerInclude.setDynamicProperty("tabSet", tabSet);
 			tabsGroupContainerInclude.setSrc(Resources.Component.TABSGROUP.getLocation());
 		}
 	}
 	
-	protected UITabSet extractTabDefinition(Treeitem treeItem) {
+	protected UITabSet getRootTabSet(Treeitem treeItem) {
 		if ( treeItem != null ) {
 			TreeNode<NodeDefinition> treeNode = treeItem.getValue();
 			NodeDefinition nodeDefn = treeNode.getData();
@@ -141,8 +141,8 @@ public class SurveyLayoutEditVM extends SurveyEditBaseVM {
 		BindUtils.postGlobalCommand(null, null, NODES_PER_TAB_CHANGED_GLOABAL_COMMAND, args);
 	}
 	
-	public UITabSet getTabSet() {
-		return tabSet;
+	public UITabSet getRootTabSet() {
+		return rootTabSet;
 	}
 	
 	public DefaultTreeModel<NodeDefinition> getNodes() {
@@ -151,6 +151,12 @@ public class SurveyLayoutEditVM extends SurveyEditBaseVM {
 		}
 		return treeModel;
     }
+	
+	public boolean isAssociatedToTab(NodeDefinition nodeDefn) {
+		UIOptions uiOptions = survey.getUIOptions();
+		boolean result = uiOptions.isAssociatedToTab(nodeDefn);
+		return result;
+	}
 	
 	public List<ModelVersion> getFormVersions() {
 		CollectSurvey survey = getSurvey();

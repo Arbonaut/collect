@@ -6,10 +6,9 @@ package org.openforis.collect.designer.viewmodel;
 
 import java.util.List;
 
-import org.openforis.collect.designer.form.ItemFormObject;
+import org.openforis.collect.designer.form.SurveyObjectFormObject;
 import org.openforis.collect.designer.util.MessageUtil;
 import org.openforis.collect.designer.util.MessageUtil.ConfirmHandler;
-import org.springframework.core.GenericTypeResolver;
 import org.zkoss.bind.BindUtils;
 import org.zkoss.bind.Binder;
 import org.zkoss.bind.annotation.BindingParam;
@@ -28,17 +27,12 @@ import org.zkoss.zkplus.databind.BindingListModelList;
  *
  */
 @VariableResolver(org.zkoss.zkplus.spring.DelegatingVariableResolver.class)
-public abstract class SurveyItemEditVM<T> extends SurveyEditBaseVM {
+public abstract class SurveyObjectBaseVM<T> extends SurveyBaseVM {
 	
-	private final Class<T> genericType;
-	protected ItemFormObject<T> formObject;
+	protected boolean newItem;
 	protected T selectedItem;
 	protected T editedItem;
-	
-	@SuppressWarnings("unchecked")
-	public SurveyItemEditVM() {
-		this.genericType = (Class<T>) GenericTypeResolver.resolveTypeArgument(getClass(), SurveyItemEditVM.class);
-	}
+	protected SurveyObjectFormObject<T> formObject;
 	
 	public BindingListModelList<T> getItems() {
 		List<T> items = getItemsInternal();
@@ -56,10 +50,10 @@ public abstract class SurveyItemEditVM<T> extends SurveyEditBaseVM {
 
 	protected void performNewItemCreation(Binder binder) {
 		T newInstance = createItemInstance();
+		newItem = true;
 		setEditedItem(newInstance);
-		addNewItemToSurvey();
-		setSelectedItem(newInstance);
-		notifyChange("editedItem", "formObject", "items", "selectedItem","moveSelectedItemUpDisabled","moveSelectedItemDownDisabled");
+		setSelectedItem(null);
+		notifyChange("editedItem","formObject","items","selectedItem");
 		validateForm(binder);
 	}
 
@@ -83,9 +77,13 @@ public abstract class SurveyItemEditVM<T> extends SurveyEditBaseVM {
 
 	@Command
 	public void applyChanges() {
-		T editedItem = getEditedItem();
 		formObject.saveTo(editedItem, currentLanguageCode);
-		notifyChange("editedItem","selectedItem");
+		if ( newItem ) {
+			addNewItemToSurvey();
+			setSelectedItem(editedItem);
+			newItem = false;
+		}
+		notifyChange("items","selectedItem");
 	}
 	
 	@Command
@@ -99,19 +97,20 @@ public abstract class SurveyItemEditVM<T> extends SurveyEditBaseVM {
 	}
 
 	protected void performItemSelection(T item) {
+		newItem = false;
 		setSelectedItem(item);
 		setEditedItem(item);
-		notifyChange("formObject","editedItem","moveSelectedItemUpDisabled","moveSelectedItemDownDisabled");
+		notifyChange("selectedItem","formObject","editedItem");
 	}
 	
 	@Command
-	@NotifyChange({"items","moveSelectedItemUpDisabled","moveSelectedItemDownDisabled"})
+	@NotifyChange({"items"})
 	public void moveSelectedItemUp() {
 		moveSelectedItem(true);
 	}
 	
 	@Command
-	@NotifyChange({"items","moveSelectedItemUpDisabled","moveSelectedItemDownDisabled"})
+	@NotifyChange({"items"})
 	public void moveSelectedItemDown() {
 		moveSelectedItem(false);
 	}
@@ -130,11 +129,13 @@ public abstract class SurveyItemEditVM<T> extends SurveyEditBaseVM {
 	
 	protected abstract void moveSelectedItem(int indexTo);
 
+	@DependsOn({"items","selectedItem"})
 	public boolean isMoveSelectedItemUpDisabled() {
 		int index = getSelectedItemIndex();
 		return index <= 0;
 	}
 	
+	@DependsOn({"items","selectedItem"})
 	public boolean isMoveSelectedItemDownDisabled() {
 		if ( selectedItem != null ) {
 			List<T> items = getItemsInternal();
@@ -146,17 +147,9 @@ public abstract class SurveyItemEditVM<T> extends SurveyEditBaseVM {
 		}
 	}
 
-	protected abstract ItemFormObject<T> createFormObject();
+	protected abstract SurveyObjectFormObject<T> createFormObject();
 	
-	protected T createItemInstance() {
-		T newInstance = null;
-		try {
-			newInstance = genericType.newInstance();
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-		return newInstance;
-	}
+	protected abstract T createItemInstance();
 	
 	@NotifyChange("items")
 	protected abstract void addNewItemToSurvey();
@@ -168,7 +161,7 @@ public abstract class SurveyItemEditVM<T> extends SurveyEditBaseVM {
 			ConfirmHandler handler = new ConfirmHandler() {
 				@Override
 				public void onOk() {
-					performRemoveItem(item);
+					performDeleteItem(item);
 				}
 			};
 			MessageUtil.showConfirm(handler, "global.item.confirm_remove");
@@ -177,7 +170,7 @@ public abstract class SurveyItemEditVM<T> extends SurveyEditBaseVM {
 		}
 	}
 
-	protected void performRemoveItem(T item) {
+	protected void performDeleteItem(T item) {
 		deleteItemFromSurvey(item);
 		notifyChange("items");
 		if ( item.equals(selectedItem) ) {
@@ -195,24 +188,11 @@ public abstract class SurveyItemEditVM<T> extends SurveyEditBaseVM {
 		return selectedItem;
 	}
 
-	@NotifyChange({"selectedItem"})
 	public void setSelectedItem(T item) {
 		selectedItem = item;
-		if ( item != null ) {
-			/*
-			try {
-				//T clonedInstance = (T) BeanUtils.cloneBean(item);
-				T clonedInstance = createItemInstance();
-				BeanUtils.copyProperties(clonedInstance, item);
-				setEditedItem(clonedInstance);
-			} catch (Exception e) {
-				throw new RuntimeException(e);
-			}
-			*/
-		}
 	}
 	
-	public ItemFormObject<T> getFormObject() {
+	public SurveyObjectFormObject<T> getFormObject() {
 		return formObject;
 	}
 

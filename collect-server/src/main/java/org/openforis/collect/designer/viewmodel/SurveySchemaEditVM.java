@@ -33,6 +33,7 @@ import org.zkoss.bind.annotation.BindingParam;
 import org.zkoss.bind.annotation.Command;
 import org.zkoss.bind.annotation.ContextParam;
 import org.zkoss.bind.annotation.ContextType;
+import org.zkoss.bind.annotation.DependsOn;
 import org.zkoss.bind.annotation.GlobalCommand;
 import org.zkoss.bind.annotation.NotifyChange;
 import org.zkoss.zk.ui.Component;
@@ -53,7 +54,11 @@ import org.zkoss.zul.Window;
  *
  */
 @VariableResolver(org.zkoss.zkplus.spring.DelegatingVariableResolver.class)
-public class SurveySchemaEditVM extends SurveyEditBaseVM {
+public class SurveySchemaEditVM extends SurveyBaseVM {
+
+	private static final String TAB_NAME_PREFIX = "tab_";
+
+	private static final String ROOT_TABSET_NAME_PREFIX = "tabset_";
 
 	private static final String SCHEMA_CHANGED_GLOBAL_COMMAND = "schemaChanged";
 	
@@ -65,11 +70,13 @@ public class SurveySchemaEditVM extends SurveyEditBaseVM {
 	
 	private SchemaTreeModel treeModel;
 	private NodeDefinition selectedNode;
+	private NodeDefinition editedNode;
+	private EntityDefinition parentEntity;
 	private Form tempFormObject;
 	private NodeDefinitionFormObject<NodeDefinition> formObject;
 	private String nodeType;
 	private String attributeType;
-	private boolean editingNode;
+	private boolean newNode;
 	private List<AttributeDefault> attributeDefaults;
 	private List<Precision> numericAttributePrecisions;
 	
@@ -97,11 +104,12 @@ public class SurveySchemaEditVM extends SurveyEditBaseVM {
 		if ( node != null ) {
 			TreeNode<NodeDefinition> treeNode = node.getValue();
 			selectedNode = treeNode.getData();
-			editingNode = true;
+			editedNode = selectedNode;
 		} else {
 			selectedNode = null;
-			editingNode = false;
+			editedNode = null;
 		}
+		newNode = false;
 		initFormObject(selectedNode);
 		refreshNodeForm();
 	}
@@ -109,7 +117,8 @@ public class SurveySchemaEditVM extends SurveyEditBaseVM {
 	@Command
 	public void addRootEntity(@ContextParam(ContextType.BINDER) Binder binder) {
 		if ( checkCurrentFormValid() ) {
-			editingNode = true;
+			newNode = true;
+			parentEntity = null;
 			nodeType = NodeType.ENTITY.name();
 			initFormObject();
 			
@@ -123,7 +132,8 @@ public class SurveySchemaEditVM extends SurveyEditBaseVM {
 	public void addNode(@ContextParam(ContextType.BINDER) Binder binder, @BindingParam("nodeType") String nodeType, @BindingParam("attributeType") String attributeType) throws Exception {
 		if ( checkCurrentFormValid() ) {
 			if ( selectedNode != null && selectedNode instanceof EntityDefinition ) {
-				editingNode = true;
+				newNode = true;
+				parentEntity = (EntityDefinition) selectedNode;
 				this.nodeType = nodeType;
 				this.attributeType = attributeType;
 				initFormObject();
@@ -132,8 +142,8 @@ public class SurveySchemaEditVM extends SurveyEditBaseVM {
 				AttributeType attributeTypeEnum = attributeType != null ? AttributeType.valueOf(attributeType): null;
 				
 				NodeDefinition newNode = NodeType.createNodeDefinition(survey, nodeTypeEnum, attributeTypeEnum );
-				( (EntityDefinition) selectedNode).addChildDefinition(newNode);
-				
+				editedNode = newNode;
+//				( (EntityDefinition) selectedNode).addChildDefinition(newNode);
 				onAfterNodeCreated(binder, newNode);
 			} else {
 				MessageUtil.showWarning("survey.schema.add_node.error.parent_entity_not_selected");
@@ -142,17 +152,21 @@ public class SurveySchemaEditVM extends SurveyEditBaseVM {
 	}
 	
 	protected void onAfterNodeCreated(Binder binder, NodeDefinition newNode) {
-		treeModel.appendNodeToSelected(newNode);
+//		treeModel.appendNodeToSelected(newNode);
+//		
+//		selectedNode = newNode;
 		
-		selectedNode = newNode;
+		editedNode = newNode;
+		selectedNode = null;
+		
+		treeModel.select(null);
 		
 		refreshNodeForm();
 		
-		notifyChange("nodes","editingNode","nodeType","attributeType",
+		notifyChange("nodes","selectedNode","editedNode","nodeType","attributeType",
 				"tempFormObject","formObject", "attributeDefaults","numericAttributePrecisions");
 
 		validateForm(binder);
-		postSchemaChangedCommand();
 	}
 	
 	protected void refreshNodeForm() {
@@ -175,6 +189,13 @@ public class SurveySchemaEditVM extends SurveyEditBaseVM {
 		nodeDetailFormInclude.setSrc(nodeDetailFormIncludeSrc);
 	}
 	
+	protected void validateForm() {
+		if ( editedNode != null ) {
+			Binder binder = (Binder) nodeFormInclude.getAttribute("$BINDER$");
+			validateForm(binder);
+		}
+	}
+		
 	protected void validateForm(@ContextParam(ContextType.BINDER) Binder binder) {
 		Component view = binder.getView();
 		IdSpace currentIdSpace = view.getSpaceOwner();
@@ -228,7 +249,7 @@ public class SurveySchemaEditVM extends SurveyEditBaseVM {
 			schema.moveRootEntityDefinition(rootEntity, newIndex);
 		}
 		treeModel.moveSelectedNode(newIndex);
-		postSchemaChangedCommand();
+		dispatchSchemaChangedCommand();
 	}
 	
 	protected void performRemoveSelectedNode() {
@@ -244,8 +265,8 @@ public class SurveySchemaEditVM extends SurveyEditBaseVM {
 			schema.removeRootEntityDefinition(nodeName);
 		}
 		treeModel.removeSelectedNode();
-		editingNode = false;
 		selectedNode = null;
+		editedNode = null;
 		tempFormObject = null;
 		formObject = null;
 		notifyChange("nodes","editingNode","tempFormObject","formObject",
@@ -270,8 +291,8 @@ public class SurveySchemaEditVM extends SurveyEditBaseVM {
 	@GlobalCommand
 	public void currentLanguageChanged() {
 		super.currentLanguageChanged();
-		if ( editingNode ) {
-			initFormObject(selectedNode);
+		if ( isEditingNode() ) {
+			initFormObject(editedNode);
 //			refreshNodeForm();
 			notifyChange("tempFormObject","formObject","attributeDefaults","numericAttributePrecisions");
 		}
@@ -280,49 +301,61 @@ public class SurveySchemaEditVM extends SurveyEditBaseVM {
 	@Command
 	@NotifyChange({"nodes","selectedNode","tempFormObject","formObject","newNode","rootEntityCreation"})
 	public void applyChanges() {
-		formObject.saveTo(selectedNode, currentLanguageCode);
-		postSchemaChangedCommand();
+		formObject.saveTo(editedNode, currentLanguageCode);
+		if ( newNode ) {
+			if ( parentEntity == null ) {
+				Schema schema = editedNode.getSchema();
+				schema.addRootEntityDefinition((EntityDefinition) editedNode);
+			} else {
+				parentEntity.addChildDefinition(editedNode);
+			}
+			treeModel.select(parentEntity);
+			treeModel.appendNodeToSelected(editedNode);
+			selectedNode = editedNode;
+			newNode = false;
+		}
+		dispatchSchemaChangedCommand();
 	}
 
 	@Command
 	public void openVersioningManagerPopUp() {
-		if ( checkCurrentFormValid() ) {
-			versioningPopUp = openPopUp(Resources.Component.VERSIONING_POPUP.getLocation(), true);
-		}
+		dispatchCurrentFormValidatedCommand(true);
+		versioningPopUp = openPopUp(Resources.Component.VERSIONING_POPUP.getLocation(), true);
 	}
 
 	@GlobalCommand
 	public void closeVersioningManagerPopUp() {
 		if ( checkCurrentFormValid() ) {
 			closePopUp(versioningPopUp);
+			validateForm();
 		}
 	}
 	
 	@Command
 	public void openCodeListsManagerPopUp() {
-		if ( checkCurrentFormValid() ) {
-			codeListsPopUp = openPopUp(Resources.Component.CODE_LISTS_POPUP.getLocation(), true);
-		}
+		dispatchCurrentFormValidatedCommand(true);
+		codeListsPopUp = openPopUp(Resources.Component.CODE_LISTS_POPUP.getLocation(), true);
 	}
 
 	@GlobalCommand
 	public void closeCodeListsManagerPopUp() {
 		if ( checkCurrentFormValid() ) {
 			closePopUp(codeListsPopUp);
+			validateForm();
 		}
 	}
 	
 	@Command
 	public void openUnitsManagerPopUp() {
-		if ( checkCurrentFormValid() ) {
-			unitsPopUp = openPopUp(Resources.Component.UNITS_MANAGER_POP_UP.getLocation(), true);
-		}
+		dispatchCurrentFormValidatedCommand(true);
+		unitsPopUp = openPopUp(Resources.Component.UNITS_MANAGER_POP_UP.getLocation(), true);
 	}
 	
 	@GlobalCommand
 	public void closeUnitsManagerPopUp() {
 		if ( checkCurrentFormValid() ) {
 			closePopUp(unitsPopUp);
+			validateForm();
 		}
 	}
 	
@@ -360,10 +393,8 @@ public class SurveySchemaEditVM extends SurveyEditBaseVM {
 	
 	protected EntityDefinition createRootEntityNode() {
 		EntityDefinition newNode = (EntityDefinition) NodeType.createNodeDefinition(survey, NodeType.ENTITY, null);
-		Schema schema = survey.getSchema();
-		schema.addRootEntityDefinition((EntityDefinition) newNode);
 		UITabSet tabSet = createRootTabSet(newNode);
-		addFirstTab(newNode, tabSet);
+		newNode.setAnnotation(UIOptions.Annotation.TAB_SET.getQName(), tabSet.getName());
 		return newNode;
 	}
 
@@ -371,24 +402,23 @@ public class SurveySchemaEditVM extends SurveyEditBaseVM {
 			UITabSet tabSet) {
 		UITab tab = new UITab();
 		int tabPosition = 1;
-		String tabName = "tab_" + tabPosition;
+		String tabName = TAB_NAME_PREFIX + tabPosition;
 		tab.setName(tabName);
 		tabSet.addTab(tab);
-		newNode.setAnnotation(UIOptions.Annotation.TAB_SET.getQName(), tabName);
 	}
 
-	protected UITabSet createRootTabSet(EntityDefinition newNode) {
+	protected UITabSet createRootTabSet(EntityDefinition rootEntity) {
 		UIOptions uiOpts = survey.getUIOptions();
-		UITabSet tabDefn = new UITabSet();
-		int tabDefnPosition = uiOpts.getTabSets().size() + 1;
-		String tabDefnName = "tabdefn_" + tabDefnPosition;
-		tabDefn.setName(tabDefnName);
-		uiOpts.addTabSet(tabDefn);
-		newNode.setAnnotation(UIOptions.Annotation.TAB_SET.getQName(), tabDefnName);
-		return tabDefn;
+		UITabSet tabSet = new UITabSet();
+		int tabSetPosition = uiOpts.getTabSets().size() + 1;
+		String tabSetName = ROOT_TABSET_NAME_PREFIX + tabSetPosition;
+		tabSet.setName(tabSetName);
+		addFirstTab(rootEntity, tabSet);
+		uiOpts.addTabSet(tabSet);
+		return tabSet;
 	}
 
-	protected void postSchemaChangedCommand() {
+	protected void dispatchSchemaChangedCommand() {
 		BindUtils.postGlobalCommand(null, null, SCHEMA_CHANGED_GLOBAL_COMMAND, null);
 	}
 	
@@ -519,8 +549,13 @@ public class SurveySchemaEditVM extends SurveyEditBaseVM {
 		return formObject;
 	}
 
+	public NodeDefinition getEditedNode() {
+		return editedNode;
+	}
+	
+	@DependsOn("editedNode")
 	public boolean isEditingNode() {
-		return editingNode;
+		return editedNode != null;
 	}
 
 	public Form getTempFormObject() {
@@ -533,6 +568,10 @@ public class SurveySchemaEditVM extends SurveyEditBaseVM {
 	
 	public List<Precision> getNumericAttributePrecisions() {
 		return numericAttributePrecisions;
+	}
+
+	public boolean isNewNode() {
+		return newNode;
 	}
 	
 }

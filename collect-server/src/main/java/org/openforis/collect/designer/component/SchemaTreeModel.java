@@ -16,12 +16,68 @@ import org.zkoss.zul.DefaultTreeModel;
 import org.zkoss.zul.DefaultTreeNode;
 import org.zkoss.zul.TreeNode;
 
+/**
+ * 
+ * @author S. Ricci
+ *
+ */
 public class SchemaTreeModel extends DefaultTreeModel<NodeDefinition> {
 	
 	private static final long serialVersionUID = 1L;
 
 	SchemaTreeModel(TreeNode<NodeDefinition> root) {
 		super(root);
+	}
+	
+	public void select(NodeDefinition defn) {
+		if ( defn != null ) {
+			NodeDefinitionTreeNode treeNode = getNode(defn);
+			setSelection(Arrays.asList(treeNode));
+		} else {
+			List<NodeDefinitionTreeNode> emptyList = Collections.emptyList();
+			setSelection(emptyList);
+		}
+	}
+	
+	public NodeDefinitionTreeNode getNode(NodeDefinition defn) {
+		if ( defn != null ) {
+			int[] path = getPath(defn);
+			return (NodeDefinitionTreeNode) getChild(path);
+		} else {
+			return null;
+		}
+	}
+	
+	public int[] getPath(NodeDefinition defn) {
+		if ( defn != null ) {
+			EntityDefinition parent = (EntityDefinition) defn.getParentDefinition();
+			NodeDefinition current = defn;
+			List<Integer> temp = new ArrayList<Integer>();
+			int index;
+			while ( parent != null ) {
+				index = parent.getChildIndex(current);
+				temp.add(0, index);
+				current = parent;
+				parent = (EntityDefinition) current.getParentDefinition();
+			}
+			EntityDefinition rootEntity = current.getRootEntity();
+			Schema schema = rootEntity.getSchema();
+			index = schema.getRootEntityIndex(rootEntity);
+			temp.add(0, index);
+			int[] result = toArray(temp);
+			return result;
+		} else {
+			return null;
+		}
+	}
+
+	private int[] toArray(List<Integer> temp) {
+		int[] result = new int[temp.size()];
+		for (int i = 0; i < temp.size(); i++) {
+			int value = temp.get(i).intValue();
+			result[i] = value;
+		}
+		return result;
 	}
 	
 	public static SchemaTreeModel createInstance(CollectSurvey survey) {

@@ -5,9 +5,10 @@ package org.openforis.collect.designer.viewmodel;
 
 import java.util.List;
 
-import org.openforis.collect.designer.form.ItemFormObject;
+import org.openforis.collect.designer.form.SurveyObjectFormObject;
 import org.openforis.collect.designer.form.SurveyMainInfoFormObject;
 import org.openforis.collect.model.CollectSurvey;
+import org.zkoss.bind.annotation.Init;
 import org.zkoss.zk.ui.select.annotation.VariableResolver;
 
 /**
@@ -16,18 +17,17 @@ import org.zkoss.zk.ui.select.annotation.VariableResolver;
  *
  */
 @VariableResolver(org.zkoss.zkplus.spring.DelegatingVariableResolver.class)
-public class SurveyMainInfoEditVM extends SurveyItemEditVM<CollectSurvey> {
+public class SurveyMainInfoVM extends SurveyObjectBaseVM<CollectSurvey> {
 	
 	@Override
-	public CollectSurvey getEditedItem() {
-		if ( editedItem == null ) {
-			editedItem = getSurvey();
-		}
-		return editedItem;
+	@Init(superclass=false)
+	public void init() {
+		super.init();
+		editedItem = getSurvey();
 	}
-	
+
 	@Override
-	public ItemFormObject<CollectSurvey> getFormObject() {
+	public SurveyObjectFormObject<CollectSurvey> getFormObject() {
 		if ( formObject == null ) {
 			CollectSurvey survey = getSurvey();
 			formObject = createFormObject();
@@ -37,7 +37,13 @@ public class SurveyMainInfoEditVM extends SurveyItemEditVM<CollectSurvey> {
 	}
 	
 	@Override
-	protected ItemFormObject<CollectSurvey> createFormObject() {
+	protected CollectSurvey createItemInstance() {
+		//do nothing, no child instances created
+		return null;
+	}
+	
+	@Override
+	protected SurveyObjectFormObject<CollectSurvey> createFormObject() {
 		return new SurveyMainInfoFormObject();
 	}
 

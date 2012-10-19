@@ -5,7 +5,7 @@ package org.openforis.collect.designer.viewmodel;
 
 import java.util.List;
 
-import org.openforis.collect.designer.form.ItemFormObject;
+import org.openforis.collect.designer.form.SurveyObjectFormObject;
 import org.openforis.collect.designer.form.ModelVersionFormObject;
 import org.openforis.collect.model.CollectSurvey;
 import org.openforis.idm.metamodel.ModelVersion;
@@ -20,7 +20,7 @@ import org.zkoss.zk.ui.select.annotation.VariableResolver;
  *
  */
 @VariableResolver(org.zkoss.zkplus.spring.DelegatingVariableResolver.class)
-public class SurveyVersioningEditVM extends SurveyItemEditVM<ModelVersion> {
+public class VersioningVM extends SurveyObjectBaseVM<ModelVersion> {
 	
 	private static final String VERSIONS_UPDATED_GLOBAL_COMMAND = "versionsUpdated";
 
@@ -29,6 +29,11 @@ public class SurveyVersioningEditVM extends SurveyItemEditVM<ModelVersion> {
 		CollectSurvey survey = getSurvey();
 		List<ModelVersion> versions = survey.getVersions();
 		return versions;
+	}
+	
+	protected ModelVersion createItemInstance() {
+		ModelVersion instance = survey.createModelVersion();
+		return instance;
 	}
 	
 	@Override
@@ -41,6 +46,7 @@ public class SurveyVersioningEditVM extends SurveyItemEditVM<ModelVersion> {
 	protected void deleteItemFromSurvey(ModelVersion item) {
 		CollectSurvey survey = getSurvey();
 		survey.removeVersion(item);
+		dispatchVersionsUpdatedCommand();
 	}
 
 	@Override
@@ -50,7 +56,7 @@ public class SurveyVersioningEditVM extends SurveyItemEditVM<ModelVersion> {
 	}
 	
 	@Override
-	protected ItemFormObject<ModelVersion> createFormObject() {
+	protected SurveyObjectFormObject<ModelVersion> createFormObject() {
 		return new ModelVersionFormObject();
 	}
 	
@@ -59,6 +65,10 @@ public class SurveyVersioningEditVM extends SurveyItemEditVM<ModelVersion> {
 	@NotifyChange({"editedItem","selectedItem"})
 	public void applyChanges() {
 		super.applyChanges();
+		dispatchVersionsUpdatedCommand();
+	}
+
+	protected void dispatchVersionsUpdatedCommand() {
 		BindUtils.postGlobalCommand(null, null, VERSIONS_UPDATED_GLOBAL_COMMAND, null);
 	}
 

@@ -1,6 +1,6 @@
 package org.openforis.collect.designer.form.validator;
 
-import org.openforis.collect.designer.viewmodel.SurveyItemEditVM;
+import org.openforis.collect.designer.viewmodel.SurveyObjectBaseVM;
 import org.openforis.collect.model.CollectSurvey;
 import org.openforis.idm.metamodel.CodeList;
 import org.zkoss.bind.ValidationContext;
@@ -11,7 +11,7 @@ import org.zkoss.util.resource.Labels;
  * @author S. Ricci
  *
  */
-public class CodeListFormValidator extends FormValidator {
+public class CodeListFormValidator extends SurveyObjectFormValidator<CodeList> {
 	
 	protected static final String NAME_FIELD = "name";
 	
@@ -32,7 +32,7 @@ public class CodeListFormValidator extends FormValidator {
 	}
 
 	protected boolean validateNameUniqueness(ValidationContext ctx) {
-		SurveyItemEditVM<CodeList> viewModel = getSurveyItemEditVM(ctx);
+		SurveyObjectBaseVM<CodeList> viewModel = getSurveyObjectVM(ctx);
 		CodeList editedItem = viewModel.getEditedItem();
 		CollectSurvey survey = viewModel.getSurvey();
 		String name = (String) getValue(ctx, NAME_FIELD);
@@ -46,14 +46,4 @@ public class CodeListFormValidator extends FormValidator {
 		}
 	}
 	
-	protected SurveyItemEditVM<CodeList> getSurveyItemEditVM(ValidationContext ctx) {
-		Object vm = getVM(ctx);
-		if ( vm instanceof SurveyItemEditVM ) {
-			@SuppressWarnings("unchecked")
-			SurveyItemEditVM<CodeList> viewModel = (SurveyItemEditVM<CodeList>) vm;
-			return viewModel;
-		} else {
-			throw new  IllegalStateException("Unexpected view model class: " + vm.getClass().getName());
-		}
-	}
 }
