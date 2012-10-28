@@ -13,6 +13,7 @@ import java.util.List;
 import org.jooq.DeleteQuery;
 import org.jooq.Record;
 import org.jooq.Result;
+import org.jooq.SQLDialect;
 import org.jooq.SimpleSelectConditionStep;
 import org.jooq.SimpleSelectQuery;
 import org.jooq.StoreQuery;
@@ -164,7 +165,12 @@ public class UserDao extends MappingJooqDaoSupport<User, JooqFactory> {
 			deleteRoles(userId);
 			List<String> roles = user.getRoles();
 			for (String role : roles) {
-				int userRoleId = nextval(OFC_USER_ROLE_ID_SEQ).intValue();
+				int userRoleId;
+				if (this.getDialect().equals(SQLDialect.SQLITE)){
+					userRoleId = getNextIdValue(OFC_USER_ROLE.getName());
+				} else {
+					userRoleId = nextval(OFC_USER_ROLE_ID_SEQ).intValue();	
+				}				
 				insertInto(OFC_USER_ROLE, 
 							OFC_USER_ROLE.ID, 
 							OFC_USER_ROLE.USER_ID, 
@@ -173,6 +179,21 @@ public class UserDao extends MappingJooqDaoSupport<User, JooqFactory> {
 					.execute();
 			}
 		}
+		
+	    /*protected final int getNextIdValue(String tableName){
+			System.out.println("NO SEQUENCES!!!!!!!!!!!!!!!!!!!!!!"+tableName);
+			Result<Record> result = this.select()
+					.from(tableName)
+					.fetch();
+			System.out.println("ILOSCwierszy"+result.size());
+			if (result.size()==0){
+				this.execute("insert into ofc_user_role_id_seq values (1);");	
+			}
+			else {
+				this.execute("UPDATE ofc_user_role_id_seq SET nextval = 2;");
+			}
+			return result.size()+1;
+	    }*/
 		
 		protected void deleteRoles(int userId) {
 			DeleteQuery<OfcUserRoleRecord> deleteQuery = deleteQuery(OFC_USER_ROLE);

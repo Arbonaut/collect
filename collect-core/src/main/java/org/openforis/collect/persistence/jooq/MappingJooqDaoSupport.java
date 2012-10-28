@@ -8,6 +8,7 @@ import org.jooq.Result;
 import org.jooq.ResultQuery;
 import org.jooq.SimpleSelectQuery;
 import org.jooq.TableField;
+import org.jooq.conf.Settings;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -22,7 +23,7 @@ public class MappingJooqDaoSupport<E, J extends MappingJooqFactory<E>> extends J
 	
 	protected J getMappingJooqFactory() {
 		Connection conn = getConnection();
-		try {
+		try {			
 			return jooqFactoryClass.getConstructor(Connection.class).newInstance(conn);
 		} catch (NoSuchMethodException e) {
 			throw new UnsupportedOperationException("Missing constructor "+jooqFactoryClass.getName()+"(java.sql.Connection)");

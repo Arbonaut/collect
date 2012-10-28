@@ -51,6 +51,30 @@ public class SurveyManager {
 		surveysByName = new HashMap<String, CollectSurvey>();
 		surveysByUri = new HashMap<String, CollectSurvey>();
 	}
+	
+	public void setSurveyDao(SurveyDao surveyDao){
+		this.surveyDao = surveyDao;
+	}
+	
+	public SurveyDao getSurveyDao(){
+		return this.surveyDao;
+	}
+	
+	public void setSurveyWorkDao(SurveyWorkDao surveyWorkDao){
+		this.surveyWorkDao = surveyWorkDao;
+	}
+	
+	public SurveyWorkDao getSurveyWorkDao(){
+		return this.surveyWorkDao;
+	}
+	
+	public void setCollectSurveyContext(CollectSurveyContext collectSurveyContext){
+		this.collectSurveyContext = collectSurveyContext;
+	}
+	
+	public CollectSurveyContext getCollectSurveyContext(){
+		return this.collectSurveyContext;
+	}
 
 	@Transactional
 	protected void init() {

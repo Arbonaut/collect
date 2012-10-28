@@ -1,6 +1,7 @@
 package org.openforis.collect.persistence;
 
 import static org.openforis.collect.persistence.jooq.Sequences.OFC_SURVEY_ID_SEQ;
+import static org.openforis.collect.persistence.jooq.Tables.OFC_USER_ROLE;
 import static org.openforis.collect.persistence.jooq.tables.OfcRecord.OFC_RECORD;
 import static org.openforis.collect.persistence.jooq.tables.OfcSurvey.OFC_SURVEY;
 
@@ -11,11 +12,13 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.jooq.Record;
 import org.jooq.Result;
+import org.jooq.SQLDialect;
 import org.jooq.SelectConditionStep;
 import org.jooq.impl.Factory;
 import org.jooq.impl.SQLDataType;
 import org.openforis.collect.model.CollectSurvey;
 import org.openforis.collect.model.SurveySummary;
+import org.openforis.collect.persistence.jooq.DialectAwareJooqFactory;
 import org.openforis.idm.metamodel.Survey;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,7 +43,17 @@ public class SurveyDao extends SurveyBaseDao {
 
 		// Insert into OFC_SURVEY table
 		Factory jf = getJooqFactory();
-		int surveyId = jf.nextval(OFC_SURVEY_ID_SEQ).intValue();
+		//int surveyId = jf.nextval(OFC_SURVEY_ID_SEQ).intValue();
+		int surveyId;
+		System.out.println("GETTING NEXT ID FROM SEQUENCE");
+		if (jf.getDialect().equals(SQLDialect.SQLITE)){
+			System.out.println("MY SEQUENCE");
+			DialectAwareJooqFactory djf = (DialectAwareJooqFactory)jf;
+			surveyId = djf.getNextIdValue(OFC_SURVEY.getName());
+			System.out.println("returnedID"+surveyId);
+		} else {
+			surveyId = jf.nextval(OFC_SURVEY_ID_SEQ).intValue();	
+		}		
 		jf.insertInto(OFC_SURVEY).set(OFC_SURVEY.ID, surveyId)				
 				.set(OFC_SURVEY.NAME, survey.getName())
 				.set(OFC_SURVEY.URI, survey.getUri())

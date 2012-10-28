@@ -5,9 +5,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jooq.DeleteQuery;
+import org.jooq.Field;
 import org.jooq.InsertQuery;
 import org.jooq.Record;
 import org.jooq.Result;
+import org.jooq.SQLDialect;
 import org.jooq.SelectQuery;
 import org.jooq.Sequence;
 import org.jooq.SimpleSelectQuery;
@@ -152,4 +154,19 @@ public abstract class MappingJooqFactory<E> extends DialectAwareJooqFactory {
 			throw new RuntimeException(e);
 		}
 	}
+	
+	/*public int getNextIdValue(String tableName){
+		System.out.println("NO SEQUENCES!!!!!!!!!!!!!!!!!!!!!!"+tableName);
+		Result<Record> result = this.select()
+				.from(tableName)
+				.fetch();
+		System.out.println("ILOSCwierszy"+result.size());
+		if (result.size()==0){
+			this.execute("insert into ofc_user_role_id_seq values (1);");	
+		}
+		else {
+			this.execute("UPDATE ofc_user_role_id_seq SET nextval = 2;");
+		}
+		return result.size()+1;
+    }*/
 }

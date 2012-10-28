@@ -30,6 +30,7 @@ import org.openforis.collect.persistence.RecordLockedByActiveUserException;
 import org.openforis.collect.persistence.RecordLockedException;
 import org.openforis.collect.persistence.RecordPersistenceException;
 import org.openforis.collect.persistence.RecordUnlockedException;
+import org.openforis.collect.persistence.UserDao;
 import org.openforis.idm.metamodel.AttributeDefault;
 import org.openforis.idm.metamodel.AttributeDefinition;
 import org.openforis.idm.metamodel.CodeAttributeDefinition;
@@ -69,6 +70,14 @@ public class RecordManager {
 	
 	protected void init() {
 		locks = new HashMap<Integer, RecordLock>();
+	}
+	
+	public RecordDao getRecordDao(){
+		return this.recordDao;
+	}
+	
+	public void setRecordDao(RecordDao recordDao){
+		this.recordDao = recordDao;
 	}
 	
 	@Transactional

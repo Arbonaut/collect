@@ -30,6 +30,21 @@ public class UserManager {
 	@Autowired
 	private RecordDao recordDao;
 	
+	public UserDao getUserDao(){
+		return this.userDao;
+	}
+	
+	public void setUserDao(UserDao userDao){
+		this.userDao = userDao;
+	}
+	
+	public RecordDao getRecordDao(){
+		return this.recordDao;
+	}
+	
+	public void setRecordDao(RecordDao recordDao){
+		this.recordDao = recordDao;
+	}
 
 	@Transactional
 	public int getUserId(String username) {
