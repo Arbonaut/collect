@@ -70,6 +70,7 @@ public class SurveyManager {
 	
 	public void setCollectSurveyContext(CollectSurveyContext collectSurveyContext){
 		this.collectSurveyContext = collectSurveyContext;
+		this.surveyDao.init(collectSurveyContext);
 	}
 	
 	public CollectSurveyContext getCollectSurveyContext(){
@@ -116,6 +117,9 @@ public class SurveyManager {
 	@Transactional
 	public void importModel(CollectSurvey survey) throws SurveyImportException {
 		surveyDao.importModel(survey);
+		if (surveys==null){
+			surveys = new ArrayList<CollectSurvey>();
+		}
 		surveys.add(survey);
 		initSurvey(survey);
 	}

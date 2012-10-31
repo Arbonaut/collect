@@ -26,8 +26,8 @@ abstract class SurveyBaseDao extends JooqDaoSupport {
 	@Autowired
 	protected CollectSurveyContext surveyContext;
 	
-	public void init() {
-		
+	public void init(CollectSurveyContext surveyCtx) {
+		this.surveyContext = surveyCtx;
 	}
 
 	protected abstract <T extends CollectSurvey> T processSurveyRow(Record row);

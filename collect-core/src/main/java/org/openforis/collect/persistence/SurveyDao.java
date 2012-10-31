@@ -45,12 +45,9 @@ public class SurveyDao extends SurveyBaseDao {
 		Factory jf = getJooqFactory();
 		//int surveyId = jf.nextval(OFC_SURVEY_ID_SEQ).intValue();
 		int surveyId;
-		System.out.println("GETTING NEXT ID FROM SEQUENCE");
 		if (jf.getDialect().equals(SQLDialect.SQLITE)){
-			System.out.println("MY SEQUENCE");
 			DialectAwareJooqFactory djf = (DialectAwareJooqFactory)jf;
 			surveyId = djf.getNextIdValue(OFC_SURVEY.getName());
-			System.out.println("returnedID"+surveyId);
 		} else {
 			surveyId = jf.nextval(OFC_SURVEY_ID_SEQ).intValue();	
 		}		

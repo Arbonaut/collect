@@ -1,5 +1,7 @@
 package org.openforis.collect.persistence.jooq;
 
+import static org.openforis.collect.persistence.jooq.tables.OfcSurvey.OFC_SURVEY;
+
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
@@ -142,7 +144,12 @@ public abstract class MappingJooqFactory<E> extends DialectAwareJooqFactory {
 	}
 
 	private int nextId() {
-		return nextval(idSequence).intValue();
+		if (this.getDialect().equals(SQLDialect.SQLITE)){
+			System.out.println("SEQUENCE"+idSequence.getName().substring(0,idSequence.getName().length()-7));
+			return this.getNextIdValue(idSequence.getName().substring(0,idSequence.getName().length()-7));
+		} else {
+			return nextval(idSequence).intValue();	
+		}		
 	}
 
 	private E newEntity() {
@@ -154,19 +161,4 @@ public abstract class MappingJooqFactory<E> extends DialectAwareJooqFactory {
 			throw new RuntimeException(e);
 		}
 	}
-	
-	/*public int getNextIdValue(String tableName){
-		System.out.println("NO SEQUENCES!!!!!!!!!!!!!!!!!!!!!!"+tableName);
-		Result<Record> result = this.select()
-				.from(tableName)
-				.fetch();
-		System.out.println("ILOSCwierszy"+result.size());
-		if (result.size()==0){
-			this.execute("insert into ofc_user_role_id_seq values (1);");	
-		}
-		else {
-			this.execute("UPDATE ofc_user_role_id_seq SET nextval = 2;");
-		}
-		return result.size()+1;
-    }*/
 }
