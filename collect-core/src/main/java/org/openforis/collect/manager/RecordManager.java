@@ -76,7 +76,6 @@ public class RecordManager {
 	
 	public RecordManager(boolean useLockingMethods){
 		this.keepLocks = useLockingMethods;
-		System.err.println("keepLocks=="+this.keepLocks);
 	}
 	
 	protected void init() {
@@ -107,17 +106,15 @@ public class RecordManager {
 		checkAllKeysSpecified(record);
 		
 		record.updateEntityCounts();
-		System.err.println("ID"+record.getId());
+
 		Integer id = record.getId();
 		if(id == null) {
-			System.err.println("INSERTING NEW RECORD");
 			recordDao.insert(record);
 			id = record.getId();
 			//todo fix: concurrency problem may occur..
 			if (this.keepLocks)
 				lock(id, user, sessionId);
 		} else {
-			System.err.println("UPDATING RECORD");
 			if (this.keepLocks)
 				checkIsLocked(id, user, sessionId);
 			recordDao.update(record);
