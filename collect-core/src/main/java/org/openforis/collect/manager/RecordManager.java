@@ -30,7 +30,6 @@ import org.openforis.collect.persistence.RecordLockedByActiveUserException;
 import org.openforis.collect.persistence.RecordLockedException;
 import org.openforis.collect.persistence.RecordPersistenceException;
 import org.openforis.collect.persistence.RecordUnlockedException;
-import org.openforis.collect.persistence.UserDao;
 import org.openforis.idm.metamodel.AttributeDefault;
 import org.openforis.idm.metamodel.AttributeDefinition;
 import org.openforis.idm.metamodel.CodeAttributeDefinition;
@@ -57,6 +56,7 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * @author M. Togna
  * @author S. Ricci
+ * @author K. Waga
  */
 public class RecordManager {
 	private final Log log = LogFactory.getLog(RecordManager.class);
@@ -68,8 +68,27 @@ public class RecordManager {
 	
 	private long lockTimeoutMillis = 60000;
 	
+	private boolean keepLocks;
+	
+	public RecordManager(){
+		this.keepLocks = true;
+	}
+	
+	public RecordManager(boolean useLockingMethods){
+		this.keepLocks = useLockingMethods;
+		System.err.println("keepLocks=="+this.keepLocks);
+	}
+	
 	protected void init() {
 		locks = new HashMap<Integer, RecordLock>();
+	}
+	
+	public boolean isUsingLockingMethods(){
+		return this.keepLocks;
+	}
+	
+	public void setUsingLockingMethods(boolean useLockingMethods){
+		this.keepLocks = useLockingMethods;
 	}
 	
 	public RecordDao getRecordDao(){
@@ -88,25 +107,33 @@ public class RecordManager {
 		checkAllKeysSpecified(record);
 		
 		record.updateEntityCounts();
-
+		System.err.println("ID"+record.getId());
 		Integer id = record.getId();
 		if(id == null) {
+			System.err.println("INSERTING NEW RECORD");
 			recordDao.insert(record);
 			id = record.getId();
 			//todo fix: concurrency problem may occur..
-			lock(id, user, sessionId);
+			if (this.keepLocks)
+				lock(id, user, sessionId);
 		} else {
-			checkIsLocked(id, user, sessionId);
+			System.err.println("UPDATING RECORD");
+			if (this.keepLocks)
+				checkIsLocked(id, user, sessionId);
 			recordDao.update(record);
 		}
 	}
 
 	@Transactional
 	public void delete(int recordId) throws RecordPersistenceException {
-		if ( isLocked(recordId) ) {
-			RecordLock lock = getLock(recordId);
-			User lockUser = lock.getUser();
-			throw new RecordLockedException(lockUser.getName());
+		if (this.keepLocks){
+			if ( isLocked(recordId) ) {
+				RecordLock lock = getLock(recordId);
+				User lockUser = lock.getUser();
+				throw new RecordLockedException(lockUser.getName());
+			} else {
+				recordDao.delete(recordId);
+			}	
 		} else {
 			recordDao.delete(recordId);
 		}
@@ -127,8 +154,10 @@ public class RecordManager {
 	 */
 	@Transactional
 	public synchronized CollectRecord checkout(CollectSurvey survey, User user, int recordId, int step, String sessionId, boolean forceUnlock) throws RecordLockedException, MultipleEditException {
-		isLockAllowed(user, recordId, sessionId, forceUnlock);
-		lock(recordId, user, sessionId, forceUnlock);
+		if (this.keepLocks){
+			isLockAllowed(user, recordId, sessionId, forceUnlock);
+			lock(recordId, user, sessionId, forceUnlock);	
+		}		
 		CollectRecord record = recordDao.load(survey, recordId, step);
 		return record;
 	}
@@ -289,8 +318,10 @@ public class RecordManager {
 	
 	@Transactional
 	public void validate(CollectSurvey survey, User user, String sessionId, int recordId, Step step) throws RecordLockedException, MultipleEditException {
-		isLockAllowed(user, recordId, sessionId, true);
-		lock(recordId, user, sessionId, true);
+		if (this.keepLocks){
+			isLockAllowed(user, recordId, sessionId, true);
+			lock(recordId, user, sessionId, true);	
+		}		
 		CollectRecord record = recordDao.load(survey, recordId, step.getStepNumber());
 		Entity rootEntity = record.getRootEntity();
 		addEmptyNodes(rootEntity);
@@ -298,7 +329,8 @@ public class RecordManager {
 		record.updateRootEntityKeyValues();
 		record.updateEntityCounts();
 		recordDao.update(record);
-		releaseLock(recordId);
+		if (this.keepLocks)
+			releaseLock(recordId);
 	}
 	
 	public Entity addEntity(Entity parentEntity, String nodeName) {

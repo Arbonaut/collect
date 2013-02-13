@@ -69,6 +69,22 @@ public class TaxonVernacularNameDao extends MappingJooqDaoSupport<TaxonVernacula
 		return entities;
 	}
 
+	public List<TaxonVernacularName> findAllByTaxonId(int taxonId){
+		
+		JooqFactory jf = getMappingJooqFactory();
+		
+		//Create query
+		SelectConditionStep selectConditionStep = jf.select(OFC_TAXON_VERNACULAR_NAME.getFields())
+				.from(OFC_TAXON_VERNACULAR_NAME)
+				.join(OFC_TAXON).on(OFC_TAXON.ID.equal(OFC_TAXON_VERNACULAR_NAME.TAXON_ID))
+				.where(OFC_TAXON.TAXON_ID.equal(taxonId));
+
+		Result<?> result = selectConditionStep.fetch();
+		List<TaxonVernacularName> entities = jf.fromResult(result);
+		return entities;
+	}	
+	
+	
 	@Override
 	public TaxonVernacularName loadById(int id) {
 		return super.loadById(id);
