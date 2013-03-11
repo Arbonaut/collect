@@ -25,6 +25,10 @@ public class MessageUtil {
 		showMessage(MessageType.INFO, messageKey);
 	}
 
+	public static void showInfo(String messageKey, String arg) {
+		showInfo(messageKey, new String[] {arg});
+	}
+	
 	public static void showInfo(String messageKey, Object[] args) {
 		showMessage(MessageType.INFO, messageKey, args);
 	}
@@ -33,8 +37,16 @@ public class MessageUtil {
 		showMessage(MessageType.ERROR, messageKey);
 	}
 
+	public static void showError(String messageKey, String arg) {
+		showError(messageKey, new String[] {arg});
+	}
+	
 	public static void showError(String messageKey, Object[] args) {
 		showMessage(MessageType.ERROR, messageKey, args);
+	}
+	
+	public static void showWarning(String messageKey, String arg) {
+		showWarning(messageKey, new String[] {arg});
 	}
 	
 	public static void showWarning(String messageKey, Object[] args) {
@@ -67,7 +79,13 @@ public class MessageUtil {
 
 	public static void showMessage(MessageType type, String messageKey, Object[] args, String titleKey, Object[] titleArgs) {
 		String message = Labels.getLabel(messageKey, args);
+		if ( message == null ) {
+			message = messageKey;
+		}
 		String title = Labels.getLabel(titleKey, titleArgs);
+		if ( title == null ) {
+			title = titleKey;
+		}
 		String icon;
 		switch ( type ) {
 		case ERROR:

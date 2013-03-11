@@ -17,14 +17,15 @@ import org.openforis.collect.model.CollectRecord.Step;
 import org.openforis.collect.model.CollectSurvey;
 import org.openforis.collect.model.FieldSymbol;
 import org.openforis.collect.model.User;
+import org.openforis.commons.collection.CollectionUtils;
 import org.openforis.idm.metamodel.EntityDefinition;
+import org.openforis.idm.metamodel.ModelVersion;
 import org.openforis.idm.metamodel.NodeDefinition;
 import org.openforis.idm.metamodel.Schema;
 import org.openforis.idm.model.Attribute;
 import org.openforis.idm.model.Entity;
 import org.openforis.idm.model.Field;
 import org.openforis.idm.model.Node;
-import org.openforis.idm.util.CollectionUtil;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -65,6 +66,7 @@ public class DataHandler extends DefaultHandler {
 	}
 	
 	public DataHandler(CollectSurvey currentSurvey, CollectSurvey recordSurvey, Map<String, User> users) {
+		super();
 		this.currentSurvey = currentSurvey;
 		this.recordSurvey = recordSurvey;
 		this.users = users;
@@ -129,30 +131,44 @@ public class DataHandler extends DefaultHandler {
 		if ( defn == null ) {
 			fail("Unknown root entity: "+localName);
 		} else {
-			String version = attributes.getValue(ATTRIBUTE_VERSION);
-			if ( StringUtils.isBlank(version) ) {
-				fail("Missing version number");
-			} else {
-				record = new CollectRecord(currentSurvey, version);
-				String stateAttr = attributes.getValue(ATTRIBUTE_STATE);
-				State state = State.fromCode(stateAttr);
-				record.setState(state);
+			String versionName = extractVersionName(attributes);
+			record = new CollectRecord(currentSurvey, versionName);
+			String stateAttr = attributes.getValue(ATTRIBUTE_STATE);
+			State state = State.fromCode(stateAttr);
+			record.setState(state);
 
-				Date created = parseDateTime(attributes.getValue(ATTRIBUTE_DATE_CREATED));
-				Date modified = parseDateTime(attributes.getValue(ATTRIBUTE_DATE_MODIFIED));
-				record.setCreationDate(created);
-				record.setModifiedDate(modified);
-				if (users != null) {
-					String createdByUserName = attributes.getValue(ATTRIBUTE_CREATED_BY);
-					User createdBy = users.get(createdByUserName);
-					record.setCreatedBy(createdBy);
-					String modifiedByUserName = attributes.getValue(ATTRIBUTE_MODIFIED_BY);
-					User modifiedBy = users.get(modifiedByUserName);
-					record.setModifiedBy(modifiedBy);
-				}				
-				node = record.createRootEntity(localName);
-			}
+			Date created = parseDateTime(attributes.getValue(ATTRIBUTE_DATE_CREATED));
+			Date modified = parseDateTime(attributes.getValue(ATTRIBUTE_DATE_MODIFIED));
+			record.setCreationDate(created);
+			record.setModifiedDate(modified);
+			if (users != null) {
+				String createdByUserName = attributes.getValue(ATTRIBUTE_CREATED_BY);
+				User createdBy = users.get(createdByUserName);
+				record.setCreatedBy(createdBy);
+				String modifiedByUserName = attributes.getValue(ATTRIBUTE_MODIFIED_BY);
+				User modifiedBy = users.get(modifiedByUserName);
+				record.setModifiedBy(modifiedBy);
+			}				
+			node = record.createRootEntity(localName);
 		}
+	}
+
+	protected String extractVersionName(Attributes attributes) {
+		String versionName = null;
+		String recordVersionName = attributes.getValue(ATTRIBUTE_VERSION);
+		if ( StringUtils.isNotBlank(recordVersionName) ) {
+			ModelVersion recordVersion = recordSurvey.getVersion(recordVersionName);
+			if ( recordVersion == null ) {
+				throw new IllegalArgumentException("Record version not found in the survey");
+			}
+			int versionId = recordVersion.getId();
+			ModelVersion version = currentSurvey.getVersionById(versionId);
+			if ( version == null ) {
+				throw new IllegalArgumentException("Record version not found in the current survey");
+			}
+			versionName = version.getName();
+		}
+		return versionName;
 	}
 
 	public void startChildNode(String localName, Attributes attributes) {
@@ -161,17 +177,20 @@ public class DataHandler extends DefaultHandler {
 		if ( childDefn == null ) {
 			warn(localName, "Undefined node");
 			pushIgnore();
-		} else if ( record.getVersion().isApplicable(childDefn)) {
-			Node<?> newNode = childDefn.createNode();
-			entity.add(newNode);
-			Integer stateValue = getNodeState();
-			if ( stateValue != null ) {
-				entity.setChildState(localName, stateValue);
-			}
-			this.node = newNode;
 		} else {
-			warn(localName, "Node definition is not applicable to the record version");
-			pushIgnore();
+			ModelVersion version = record.getVersion();
+			if ( version == null || version.isApplicable(childDefn)) {
+				Node<?> newNode = childDefn.createNode();
+				entity.add(newNode);
+				Integer stateValue = getNodeState();
+				if ( stateValue != null ) {
+					entity.setChildState(localName, stateValue);
+				}
+				this.node = newNode;
+			} else {
+				warn(localName, "Node definition is not applicable to the record version");
+				pushIgnore();
+			}
 		}
 	}
 
@@ -366,11 +385,11 @@ public class DataHandler extends DefaultHandler {
 	}
 
 	public List<NodeUnmarshallingError> getFailures() {
-		return CollectionUtil.unmodifiableList(failures);
+		return CollectionUtils.unmodifiableList(failures);
 	}
 	
 	public List<NodeUnmarshallingError> getWarnings() {
-		return CollectionUtil.unmodifiableList(warnings);
+		return CollectionUtils.unmodifiableList(warnings);
 	}
 	
 	public static class NodeUnmarshallingError {

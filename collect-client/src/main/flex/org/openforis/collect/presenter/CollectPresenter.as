@@ -43,6 +43,17 @@ package org.openforis.collect.presenter {
 	import org.openforis.collect.util.PopUpUtil;
 	import org.openforis.collect.ui.component.DataImportPopUp;
 	import org.openforis.collect.ui.component.user.UserManagementPopUp;
+	import org.openforis.collect.ui.component.SurveySelectionPopUp;
+	import mx.managers.PopUpManager;
+	import flash.display.DisplayObject;
+	import org.openforis.collect.util.StringUtil;
+	import org.openforis.collect.metamodel.proxy.ModelVersionProxy;
+	import org.openforis.collect.model.proxy.RecordProxy;
+	import org.openforis.collect.util.CollectionUtil;
+	import org.openforis.collect.ui.component.SpeciesImportPopUp;
+	import mx.core.IFlexDisplayObject;
+	import org.openforis.collect.util.ObjectUtil;
+	import mx.resources.Locale;
 	
 	/**
 	 * 
@@ -54,16 +65,11 @@ package org.openforis.collect.presenter {
 		
 		private static const MOUSE_WHEEL_BUMP_DELTA:Number = 30;
 		
-		private const SURVEY_SELECTION_MENU_ITEM:String = Message.get("settings.selectSurvey");
-		private const IMPORT_DATA_MENU_ITEM:String = Message.get("settings.admin.importData");
-		private const USERS_MANAGEMENT_MENU_ITEM:String = Message.get("settings.admin.usersManagement");
-		private const LOGOUT_MENU_ITEM:String = Message.get("settings.logout");
-		private const ADMIN_SETTINGS_ITEMS:ArrayCollection = new ArrayCollection([IMPORT_DATA_MENU_ITEM, USERS_MANAGEMENT_MENU_ITEM]);
-		
 		private var _view:collect;
 		private var _modelClient:ModelClient;
 		private var _sessionClient:SessionClient;
 		//private var _contextMenuPresenter:ContextMenuPresenter;
+		private var _speciesImportPopUp:SpeciesImportPopUp;
 		
 		private var _keepAliveTimer:Timer;
 		
@@ -79,42 +85,103 @@ package org.openforis.collect.presenter {
 			_keepAliveTimer.start();
 
 			//set language in session
-			var localeString:String = FlexGlobals.topLevelApplication.parameters.lang as String;
-			if(localeString != null) {
-				this._sessionClient.initSession(new AsyncResponder(initSessionResultHandler, faultHandler), localeString);
-			}
+			init();
 		}
 		
 		override internal function initEventListeners():void {
 			//mouse wheel handler to increment scroll step size
 			FlexGlobals.topLevelApplication.systemManager.addEventListener(MouseEvent.MOUSE_WHEEL, mouseWheelHandler, true);
-			eventDispatcher.addEventListener(UIEvent.SHOW_SURVEY_SELECTION, showSurveySelectionHandler);
-			eventDispatcher.addEventListener(UIEvent.SURVEY_SELECTED, surveySelectedHandler);
-			eventDispatcher.addEventListener(UIEvent.ROOT_ENTITY_SELECTED, rootEntitySelectedHandler);
-			
-			//_view.header.logoutButton.addEventListener(MouseEvent.CLICK, logoutButtonClickHandler);
-			
-			_view.header.settingsButton.addEventListener(MenuEvent.ITEM_CLICK, settingsItemClickHandler);
+			eventDispatcher.addEventListener(UIEvent.LOGOUT_CLICK, logoutClickHandler);
+			eventDispatcher.addEventListener(UIEvent.SHOW_LIST_OF_RECORDS, showListOfRecordsHandler);
+			eventDispatcher.addEventListener(UIEvent.OPEN_SPECIES_IMPORT_POPUP, openSpeciesImportPopUpHandler);
+			eventDispatcher.addEventListener(UIEvent.CLOSE_SPECIES_IMPORT_POPUP, closeSpeciesImportPopUpHandler);
 			
 			CONFIG::debugging {
 				_view.addEventListener(KeyboardEvent.KEY_DOWN, function(event:KeyboardEvent):void {
 					//open FlexSpy popup pressing CTRL+i
-					if(event.ctrlKey && event.charCode == 105)
+					if ( event.ctrlKey && event.charCode == 105 ) {
 						FlexSpy.show();
+					}
 				});
 			}
 		}
 		
-		protected function updateSettingsPopUpMenu(includeSurveySelectionItem:Boolean = true):void {
-			var result:ArrayCollection = new ArrayCollection();
-			if ( includeSurveySelectionItem && canHaveSurveySelection() ) {
-				result.addItem(SURVEY_SELECTION_MENU_ITEM);
+		internal function init():void {
+			var params:Object = FlexGlobals.topLevelApplication.parameters;
+			var preview:Boolean = params.preview == "true";
+			var speciesImport:Boolean = params.species_import == "true";
+			var codeListImport:Boolean = params.code_list_import == "true";
+			var samplingDesignImport:Boolean = params.sampling_design_import == "true";
+			var localeString:String = params.lang as String;
+			if ( StringUtil.isEmpty(localeString) ) {
+				AlertUtil.showError("global.error.invalidLocaleSpecified");
+			} else if ( preview ) {
+				initForPreview(params, localeString);
+			} else if ( speciesImport ) {
+				initForSpeciesImport();
+			} else if ( samplingDesignImport ) {
+				initForSamplingDesignImport(params, localeString);
+			} else if ( codeListImport ) {
+				initForCodeListImport();
+			} else {
+				var responder:IResponder = new AsyncResponder(initSessionResultHandler, faultHandler);
+				this._sessionClient.initSession(responder, localeString);
 			}
-			if ( Application.user.hasEffectiveRole(UserProxy.ROLE_ADMIN) ) {
-				result.addAll(ADMIN_SETTINGS_ITEMS);
+		}
+		
+		protected function initForPreview(params:Object, localeString:String):void {
+			Application.preview = true;
+			var surveyId:int = int(params.surveyId);
+			var rootEntityId:int = int(params.rootEntityId);
+			var versionId:Number = Number(params.versionId);
+			var token:Object = {surveyId: surveyId, rootEntityId: rootEntityId, versionId: versionId};
+			var previewResp:IResponder = new AsyncResponder(initSessionForPreviewResultHandler, faultHandler, token);
+			this._sessionClient.initSession(previewResp, localeString);
+		}
+		
+		protected function initForSpeciesImport():void {
+			_view.currentState = collect.FULL_SCREEN_STATE;
+			var params:Object = FlexGlobals.topLevelApplication.parameters;
+			var surveyId:int = int(params.surveyId);
+			if ( surveyId > 0 && params.work != "null" ) {
+				var localeString:String = params.lang as String;
+				var work:Boolean = params.work == "true";
+				var token:Object = {surveyId: surveyId, work: work};
+				var sessionInitResponder:IResponder = new AsyncResponder(initSessionForSpeciesImportResultHandler, faultHandler, token);
+				this._sessionClient.initSession(sessionInitResponder, localeString);
+			} else {
+				AlertUtil.showError("referenceDataImport.saveSurveyBefore");
 			}
-			result.addItem(LOGOUT_MENU_ITEM);
-			_view.header.settingsButton.dataProvider = result;
+		}
+		
+		protected function initForCodeListImport():void {
+			_view.currentState = collect.FULL_SCREEN_STATE;
+			var params:Object = FlexGlobals.topLevelApplication.parameters;
+			var surveyId:int = int(params.surveyId);
+			var codeListId:int = int(params.code_list_id);
+			if ( surveyId > 0 && params.work != "null" && codeListId > 0 ) {
+				var localeString:String = params.lang as String;
+				var work:Boolean = params.work == "true";
+				var token:Object = {surveyId: surveyId, work: work, codeListId: codeListId};
+				var sessionInitResponder:IResponder = new AsyncResponder(initSessionForCodeListImportResultHandler, faultHandler, token);
+				this._sessionClient.initSession(sessionInitResponder, localeString);
+			} else {
+				AlertUtil.showError("referenceDataImport.saveSurveyBefore");
+			}
+		}
+		
+		protected function initForSamplingDesignImport(params:Object, localeString:String):void {
+			_view.currentState = collect.FULL_SCREEN_STATE;
+			var surveyId:int = int(params.surveyId);
+			if ( surveyId > 0 && params.work != "null" ) {
+				var work:Boolean = params.work == "true";
+				var token:Object = {surveyId: surveyId, work: work};
+				var samplingDesignImportSessionInitResponder:IResponder = new AsyncResponder(initSessionForSamplingDesignImportResultHandler, faultHandler, token);
+				this._sessionClient.initSession(samplingDesignImportSessionInitResponder, localeString);
+			} else {
+				AlertUtil.showError("referenceDataImport.saveSurveyBefore");
+			}
+			
 		}
 		
 		protected function canHaveSurveySelection():Boolean {
@@ -122,7 +189,7 @@ package org.openforis.collect.presenter {
 				Application.activeSurvey != null && Application.activeSurvey.schema.rootEntityDefinitions.length > 0; 
 		}
 		
-		protected function logoutButtonClickHandler(event:MouseEvent):void {
+		protected function logoutClickHandler(event:UIEvent):void {
 			var messageKey:String;
 			if ( Application.activeRecord != null && Application.activeRecord.updated ) {
 				messageKey = "global.confirmLogoutRecordUpdated";
@@ -143,14 +210,102 @@ package org.openforis.collect.presenter {
 			navigateToURL(u,"_self");
 		}
 		
-		internal function initSessionResultHandler(event:ResultEvent, token:Object = null):void {
+		internal function initSessionCommonResultHandler(event:ResultEvent, token:Object = null):void {
 			Application.user = event.result.user;
 			Application.sessionId = event.result.sessionId;
-			Application.locale = FlexGlobals.topLevelApplication.parameters.lang as String;
-			
+			var locale:Locale = new Locale(FlexGlobals.topLevelApplication.parameters.lang as String);
+			Application.locale = locale;
+		}
+		
+		internal function initSessionResultHandler(event:ResultEvent, token:Object = null):void {
+			initSessionCommonResultHandler(event, token);
 			getSurveySummaries();
-			
-			updateSettingsPopUpMenu();
+		}
+		
+		internal function initSessionForPreviewResultHandler(event:ResultEvent, token:Object = null):void {
+			initSessionCommonResultHandler(event, token);
+			var surveyId:int = token.surveyId;
+			var responder:IResponder = new AsyncResponder(setActivePreviewSurveyResultHandler, faultHandler, token);
+			ClientFactory.sessionClient.setActivePreviewSurvey(responder, surveyId);
+		}
+		
+		internal function initSessionForSpeciesImportResultHandler(event:ResultEvent, token:Object = null):void {
+			initSessionCommonResultHandler(event, token);
+			var surveyId:int = token.surveyId;
+			var work:Boolean = token.work;
+			var responder:IResponder = new AsyncResponder(setActiveSurveyForSpeciesImportResultHandler, faultHandler, token);
+			ClientFactory.sessionClient.setDesignerSurveyAsActive(responder, surveyId, work);
+		}
+		
+		internal function initSessionForCodeListImportResultHandler(event:ResultEvent, token:Object = null):void {
+			initSessionCommonResultHandler(event, token);
+			var surveyId:int = token.surveyId;
+			var work:Boolean = token.work;
+			var responder:IResponder = new AsyncResponder(setActiveSurveyForCodeListImportResultHandler, faultHandler, token);
+			ClientFactory.sessionClient.setDesignerSurveyAsActive(responder, surveyId, work);
+		}
+		
+		internal function initSessionForSamplingDesignImportResultHandler(event:ResultEvent, token:Object = null):void {
+			initSessionCommonResultHandler(event, token);
+			var surveyId:int = token.surveyId;
+			var work:Boolean = token.work;
+			var responder:IResponder = new AsyncResponder(setDesignerSurveyAsActiveResultHandler, faultHandler, token);
+			ClientFactory.sessionClient.setDesignerSurveyAsActive(responder, surveyId, work);
+			function setDesignerSurveyAsActiveResultHandler(event:ResultEvent, token:Object = null):void {
+				var survey:SurveyProxy = event.result as SurveyProxy;
+				Application.activeSurvey = survey;
+				showSamplingDesignImport(token);
+			}
+		}
+		
+		internal function showSamplingDesignImport(token:Object):void {
+			var uiEvent:UIEvent = new UIEvent(UIEvent.SHOW_SAMPLING_DESIGN_IMPORT);
+			uiEvent.obj = token;
+			eventDispatcher.dispatchEvent(uiEvent);
+		}
+		
+		protected function setActivePreviewSurveyResultHandler(event:ResultEvent, token:Object = null):void {
+			var survey:SurveyProxy = event.result as SurveyProxy;
+			Application.activeSurvey = survey;
+			survey.init();
+			var versionName:String = null;
+			if (! isNaN(token.versionId) ) {
+				var version:ModelVersionProxy = survey.getVersion(token.versionId);
+				versionName = version.name;
+			}
+			var rootEntityId:int = token.rootEntityId;
+			var schema:SchemaProxy = survey.schema;
+			var rootEntityDef:EntityDefinitionProxy = EntityDefinitionProxy(schema.getDefinitionById(rootEntityId));
+			Application.activeRootEntity = rootEntityDef;
+			var newRecordResponder:IResponder = new AsyncResponder(createRecordResultHandler, faultHandler);
+			ClientFactory.dataClient.createNewRecord(newRecordResponder, rootEntityDef.name, versionName);
+		}
+		
+		internal function setActiveSurveyForSpeciesImportResultHandler(event:ResultEvent, token:Object = null):void {
+			var survey:SurveyProxy = event.result as SurveyProxy;
+			Application.activeSurvey = survey;
+			survey.init();
+			var uiEvent:UIEvent = new UIEvent(UIEvent.SHOW_SPECIES_IMPORT);
+			uiEvent.obj = token;
+			eventDispatcher.dispatchEvent(uiEvent);
+		}
+
+		internal function setActiveSurveyForCodeListImportResultHandler(event:ResultEvent, token:Object = null):void {
+			var survey:SurveyProxy = event.result as SurveyProxy;
+			Application.activeSurvey = survey;
+			survey.init();
+			var uiEvent:UIEvent = new UIEvent(UIEvent.SHOW_CODE_LIST_IMPORT);
+			uiEvent.obj = token;
+			eventDispatcher.dispatchEvent(uiEvent);
+		}
+		
+		protected function createRecordResultHandler(event:ResultEvent, token:Object = null):void {
+			var record:RecordProxy = event.result as RecordProxy;
+			record.survey = Application.activeSurvey;
+			record.init();
+			var uiEvent:UIEvent = new UIEvent(UIEvent.RECORD_CREATED);
+			uiEvent.obj = record;
+			eventDispatcher.dispatchEvent(uiEvent);
 		}
 		
 		internal function mouseWheelHandler(event:MouseEvent):void {
@@ -158,21 +313,31 @@ package org.openforis.collect.presenter {
 			event.delta *= MOUSE_WHEEL_BUMP_DELTA;
 		}
 		
-		protected function settingsItemClickHandler(event:MenuEvent):void {
-			switch ( event.item ) {
-				case SURVEY_SELECTION_MENU_ITEM:
-					var uiEvent:UIEvent = new UIEvent(UIEvent.SHOW_SURVEY_SELECTION);
-					eventDispatcher.dispatchEvent(uiEvent);
-					break;
-				case IMPORT_DATA_MENU_ITEM:
-					PopUpUtil.createPopUp(DataImportPopUp, true);
-					break;
-				case USERS_MANAGEMENT_MENU_ITEM:
-					PopUpUtil.createPopUp(UserManagementPopUp, true);
-					break;
-				case LOGOUT_MENU_ITEM:
-					logoutButtonClickHandler(null);
-					break;
+		protected function showListOfRecordsHandler(event:UIEvent):void {
+			if ( Application.activeSurvey != null && Application.activeRootEntity != null ) {
+				var uiEvent:UIEvent = new UIEvent(UIEvent.ROOT_ENTITY_SELECTED);
+				uiEvent.obj = Application.activeRootEntity;
+				eventDispatcher.dispatchEvent(uiEvent);
+			} else {
+				openSurveySelectionPopUp();
+			}
+		}
+		
+		protected function openSurveySelectionPopUp(automaticallySelect:Boolean = true):void {
+			var popUp:SurveySelectionPopUp = new SurveySelectionPopUp();
+			popUp.visible = false;
+			popUp.automaticallySelect = automaticallySelect;
+			PopUpManager.addPopUp(popUp, FlexGlobals.topLevelApplication as DisplayObject, true);
+			PopUpManager.centerPopUp(popUp);
+		}
+		
+		protected function openSpeciesImportPopUpHandler(event:Event = null):void {
+			_speciesImportPopUp = SpeciesImportPopUp(PopUpUtil.createPopUp(SpeciesImportPopUp));
+		}
+		
+		protected function closeSpeciesImportPopUpHandler(event:Event = null):void {
+			if ( _speciesImportPopUp != null ) {
+				PopUpManager.removePopUp(_speciesImportPopUp);
 			}
 		}
 		
@@ -181,59 +346,32 @@ package org.openforis.collect.presenter {
 		 * 
 		 * */
 		internal function getSurveySummaries():void {
-			_modelClient.getSurveySummaries(new ItemResponder(getSurveySummariesResultHandler, faultHandler));
+			var responder:IResponder = new ItemResponder(getSurveySummariesResultHandler, faultHandler);
+			_modelClient.getSurveySummaries(responder);
 		}
 		
 		internal function getSurveySummariesResultHandler(event:ResultEvent, token:Object = null):void {
 			var summaries:IList =  event.result as IList;
 			Application.surveySummaries = summaries;
-			var uiEvent:UIEvent;
-			if ( summaries.length == 1) {
-				var s:SurveySummary = summaries.getItemAt(0) as SurveySummary;
-				uiEvent = new UIEvent(UIEvent.SURVEY_SELECTED);
-				uiEvent.obj = s;
-				eventDispatcher.dispatchEvent(uiEvent);
+			if ( Application.user.hasEffectiveRole(UserProxy.ROLE_ADMIN) ) {
+				showHomePage();
+			} else if ( CollectionUtil.isEmpty(Application.surveySummaries) ) {
+				showErrorPage(Message.get("error.no_published_surveys_found"));
 			} else {
-				uiEvent = new UIEvent(UIEvent.SHOW_SURVEY_SELECTION);
-				eventDispatcher.dispatchEvent(uiEvent);
+				showHomePage();
+				showListOfRecordsHandler(null);
 			}
 		}
 		
-		protected function showSurveySelectionHandler(event:UIEvent):void {
-			updateSettingsPopUpMenu(false);
+		protected function showErrorPage(errorMessage:String):void {
+			var uiEvent:UIEvent = new UIEvent(UIEvent.SHOW_ERROR_PAGE);
+			uiEvent.obj = errorMessage;
+			eventDispatcher.dispatchEvent(uiEvent);
 		}
 		
-		protected function surveySelectedHandler(event:UIEvent):void {
-			var s:SurveySummary = event.obj as SurveySummary;
-			var name:String = s.name;
-			var responder:IResponder = new ItemResponder(setActiveSurveyResultHandler, faultHandler);
-			_modelClient.setActiveSurvey(responder, name);			
-		}
-		
-		protected function rootEntitySelectedHandler(event:UIEvent):void {
-			updateSettingsPopUpMenu();
-		}
-		
-		protected function setActiveSurvey(survey:SurveyProxy):void {
-			Application.activeSurvey = survey;
-			survey.init();
-			var schema:SchemaProxy = survey.schema;
-			var rootEntityDefinitions:ListCollectionView = schema.rootEntityDefinitions;
-			var uiEvent:UIEvent;
-			if ( rootEntityDefinitions.length == 1) {
-				var rootEntityDef:EntityDefinitionProxy = rootEntityDefinitions.getItemAt(0) as EntityDefinitionProxy;
-				uiEvent = new UIEvent(UIEvent.ROOT_ENTITY_SELECTED);
-				uiEvent.obj = rootEntityDef;
-				eventDispatcher.dispatchEvent(uiEvent);
-			} else {
-				uiEvent = new UIEvent(UIEvent.SHOW_ROOT_ENTITY_SELECTION);
-				eventDispatcher.dispatchEvent(uiEvent);
-			}
-		}
-		
-		internal function setActiveSurveyResultHandler(event:ResultEvent, token:Object = null):void {
-			var survey:SurveyProxy = event.result as SurveyProxy;
-			setActiveSurvey(survey);
+		protected function showHomePage():void {
+			var uiEvent:UIEvent = new UIEvent(UIEvent.SHOW_HOME_PAGE);
+			eventDispatcher.dispatchEvent(uiEvent);
 		}
 		
 		internal function sendKeepAliveMessage(event:TimerEvent):void {

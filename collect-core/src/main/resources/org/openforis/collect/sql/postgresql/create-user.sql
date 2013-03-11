@@ -1,0 +1,1 @@
+CREATE USER "collect" WITH PASSWORD 'collect';

@@ -7,11 +7,13 @@ package org.openforis.collect.presenter {
 	import flash.events.Event;
 	import flash.events.MouseEvent;
 	
+	import mx.collections.ArrayCollection;
 	import mx.collections.IList;
 	import mx.collections.ListCollectionView;
 	import mx.core.FlexGlobals;
 	import mx.events.CloseEvent;
 	import mx.events.FlexEvent;
+	import mx.events.MenuEvent;
 	import mx.managers.PopUpManager;
 	import mx.rpc.AsyncResponder;
 	import mx.rpc.IResponder;
@@ -20,14 +22,17 @@ package org.openforis.collect.presenter {
 	import org.openforis.collect.Application;
 	import org.openforis.collect.client.ClientFactory;
 	import org.openforis.collect.client.DataClient;
+	import org.openforis.collect.event.PaginationBarEvent;
 	import org.openforis.collect.event.UIEvent;
 	import org.openforis.collect.i18n.Message;
 	import org.openforis.collect.metamodel.proxy.EntityDefinitionProxy;
 	import org.openforis.collect.metamodel.proxy.ModelVersionProxy;
 	import org.openforis.collect.model.CollectRecord$Step;
 	import org.openforis.collect.model.proxy.RecordProxy;
+	import org.openforis.collect.model.proxy.UserProxy;
 	import org.openforis.collect.ui.UIBuilder;
 	import org.openforis.collect.ui.component.DataExportPopUp;
+	import org.openforis.collect.ui.component.DataImportPopUp;
 	import org.openforis.collect.ui.component.RecordFilterPopUp;
 	import org.openforis.collect.ui.component.SelectVersionPopUp;
 	import org.openforis.collect.ui.component.datagrid.PaginationBar;
@@ -35,6 +40,7 @@ package org.openforis.collect.presenter {
 	import org.openforis.collect.ui.component.input.TextInput;
 	import org.openforis.collect.ui.view.ListView;
 	import org.openforis.collect.util.AlertUtil;
+	import org.openforis.collect.util.CollectionUtil;
 	import org.openforis.collect.util.PopUpUtil;
 	import org.openforis.collect.util.StringUtil;
 	
@@ -43,6 +49,9 @@ package org.openforis.collect.presenter {
 
 	public class ListPresenter extends AbstractPresenter {
 		
+		private const EXPORT_DATA_MENU_ITEM:String = Message.get("list.admin.exportData");
+		private const IMPORT_DATA_MENU_ITEM:String = Message.get("list.admin.importData");
+		
 		private var _view:ListView;
 		private var _dataClient:DataClient;
 		
@@ -50,19 +59,6 @@ package org.openforis.collect.presenter {
 		private var _newRecordResponder:IResponder;
 		private var _filterPopUp:RecordFilterPopUp;
 		
-		/**
-		 * The total number of records.
-		 */
-		private var totalRecords:int;
-		/**
-		 * The total pages of the pagination.
-		 */
-		private var totalPages:int;
-		/**
-		 * The current page of the pagination.
-		 * It starts from 1 
-		 */
-		private var currentPage:int;
 		/**
 		 * The current sortField
 		 */
@@ -82,27 +78,30 @@ package org.openforis.collect.presenter {
 			this._dataClient = ClientFactory.dataClient;
 			this._view.dataGrid.requestedRowCount = MAX_RECORDS_PER_PAGE;
 			_newRecordResponder = new AsyncResponder(createRecordResultHandler, faultHandler);
+			createAdvancedFunctionMenu();
+			_view.paginationBar.maxRecordsPerPage = MAX_RECORDS_PER_PAGE;
 			super();
 		}
 
 		override internal function initEventListeners():void {
 			eventDispatcher.addEventListener(UIEvent.LOAD_RECORD_SUMMARIES, loadRecordSummariesHandler);
 			eventDispatcher.addEventListener(UIEvent.RELOAD_RECORD_SUMMARIES, reloadRecordSummariesHandler);
-
-			this._view.addButton.addEventListener(MouseEvent.CLICK, addButtonClickHandler);
-			this._view.editButton.addEventListener(MouseEvent.CLICK, editButtonClickHandler);
-			this._view.deleteButton.addEventListener(MouseEvent.CLICK, deleteButtonClickHandler);
-			this._view.exportButton.addEventListener(MouseEvent.CLICK, exportButtonClickHandler);
-			this._view.openFilterPopUpButton.addEventListener(MouseEvent.CLICK, openFilterPopUpButtonClickHandler);
 			
-			this._view.dataGrid.addEventListener(GridSortEvent.SORT_CHANGING, dataGridSortChangingHandler);
+			_view.backToMainMenuButton.addEventListener(MouseEvent.CLICK, backToMainMenuClickHandler);
+			_view.addButton.addEventListener(MouseEvent.CLICK, addButtonClickHandler);
+			_view.editButton.addEventListener(MouseEvent.CLICK, editButtonClickHandler);
+			_view.deleteButton.addEventListener(MouseEvent.CLICK, deleteButtonClickHandler);
+			_view.advancedFunctionsButton.addEventListener(MenuEvent.ITEM_CLICK, advancedFunctionItemClickHandler);
+			_view.openFilterPopUpButton.addEventListener(MouseEvent.CLICK, openFilterPopUpButtonClickHandler);
 			
-			this._view.paginationBar.firstPageButton.addEventListener(MouseEvent.CLICK, firstPageClickHandler);
-			this._view.paginationBar.previousPageButton.addEventListener(MouseEvent.CLICK, previousPageClickHandler);
-			this._view.paginationBar.nextPageButton.addEventListener(MouseEvent.CLICK, nextPageClickHandler);
-			this._view.paginationBar.lastPageButton.addEventListener(MouseEvent.CLICK, lastPageClickHandler);
-			//this._view.paginationBar.goToPageButton.addEventListener(MouseEvent.CLICK, goToPageClickHandler);
+			_view.dataGrid.addEventListener(GridSortEvent.SORT_CHANGING, dataGridSortChangingHandler);
+			
+			_view.paginationBar.addEventListener(PaginationBarEvent.PAGE_CHANGE, summaryPageChangeHandler);
 			_view.stage.addEventListener(MouseEvent.CLICK, stageClickHandler);
+		}
+		
+		protected function backToMainMenuClickHandler(event:Event):void {
+			eventDispatcher.dispatchEvent(new UIEvent(UIEvent.SHOW_HOME_PAGE));
 		}
 		
 		/**
@@ -110,10 +109,12 @@ package org.openforis.collect.presenter {
 		 * */
 		protected function addButtonClickHandler(event:MouseEvent):void {
 			var versions:ListCollectionView = Application.activeSurvey.versions;
-			if(versions.length > 1) {
-				openSelectVersionPopUp();
-			} else {
+			if ( CollectionUtil.isEmpty(versions) ) {
+				addNewRecord();
+			} else if ( versions.length == 1) {
 				addNewRecord(versions.getItemAt(0) as ModelVersionProxy);
+			} else {
+				openSelectVersionPopUp();
 			}
 		}
 		protected function openSelectVersionPopUp():void {
@@ -121,26 +122,47 @@ package org.openforis.collect.presenter {
 				_selectVersionPopUp = new SelectVersionPopUp();
 				PopUpManager.addPopUp(_selectVersionPopUp, FlexGlobals.topLevelApplication as DisplayObject, true);
 				_selectVersionPopUp.addEventListener(CloseEvent.CLOSE, cancelSelectVersionClickHandler);
-				_selectVersionPopUp.addButton.addEventListener(MouseEvent.CLICK, newRecordVersionSelectedHandler);
+				_selectVersionPopUp.addButton.addEventListener(MouseEvent.CLICK, addRecordButtonClickHandler);
 				_selectVersionPopUp.cancelButton.addEventListener(MouseEvent.CLICK, cancelSelectVersionClickHandler);
 			} else {
 				PopUpManager.addPopUp(_selectVersionPopUp, FlexGlobals.topLevelApplication as DisplayObject, true);
 			}
-			var rootEntityLabel:String = Application.activeRootEntity.getLabelText();
+			var rootEntityLabel:String = Application.activeRootEntity.getInstanceOrHeadingLabelText();
 			_selectVersionPopUp.versionsDropDownList.dataProvider = Application.activeSurvey.versions;
 			_selectVersionPopUp.title = Message.get('list.newRecordPopUp.title', [rootEntityLabel]);
 			PopUpManager.centerPopUp(_selectVersionPopUp);
 		}
 		
-		protected function newRecordVersionSelectedHandler(event:Event):void {
+		protected function createAdvancedFunctionMenu():void {
+			var result:ArrayCollection = new ArrayCollection();
+			result.addItem(EXPORT_DATA_MENU_ITEM);
+			if ( Application.user.hasEffectiveRole(UserProxy.ROLE_ADMIN) ) {
+				result.addItem(IMPORT_DATA_MENU_ITEM);
+			}
+			_view.advancedFunctionsButton.dataProvider = result;
+		}
+		
+		protected function advancedFunctionItemClickHandler(event:MenuEvent):void {
+			switch ( event.item ) {
+				case IMPORT_DATA_MENU_ITEM:
+					PopUpUtil.createPopUp(DataImportPopUp, true);
+					break;
+				case EXPORT_DATA_MENU_ITEM:
+					PopUpUtil.createPopUp(DataExportPopUp, true);
+					break;
+			}
+		}
+		
+		protected function addRecordButtonClickHandler(event:Event):void {
 			var version:ModelVersionProxy = ModelVersionProxy(_selectVersionPopUp.versionsDropDownList.selectedItem);
 			PopUpManager.removePopUp(_selectVersionPopUp);
 			addNewRecord(version);
 		}
 
-		protected function addNewRecord(version:ModelVersionProxy):void {
+		protected function addNewRecord(version:ModelVersionProxy = null):void {
 			var rootEntityName:String = Application.activeRootEntity.name;
-			_dataClient.createNewRecord(_newRecordResponder, rootEntityName, version.name);
+			var versionName:String = version != null ? version.name: null;
+			_dataClient.createNewRecord(_newRecordResponder, rootEntityName, versionName);
 		}
 		
 		protected function cancelSelectVersionClickHandler(event:Event):void {
@@ -156,7 +178,6 @@ package org.openforis.collect.presenter {
 			eventDispatcher.dispatchEvent(uiEvent);
 			PopUpManager.removePopUp(_view);
 		}
-		
 		
 		/**
 		 * Edit Button clicked 
@@ -176,7 +197,7 @@ package org.openforis.collect.presenter {
 		 * Delete Button clicked 
 		 * */
 		protected function deleteButtonClickHandler(event:MouseEvent):void {
-			var rootEntityLabel:String = Application.activeRootEntity.getLabelText();
+			var rootEntityLabel:String = Application.activeRootEntity.getInstanceOrHeadingLabelText();
 			var selectedRecord:RecordProxy = _view.dataGrid.selectedItem as RecordProxy;
 			if(selectedRecord == null) {
 				AlertUtil.showError("list.error.recordNotSelected");
@@ -206,10 +227,8 @@ package org.openforis.collect.presenter {
 			} else if ( currentKeyValuesFilter == null ) {
 				openFilterPopUp();
 			} else {
-				currentKeyValuesFilter = null;
-				_view.openFilterPopUpButton.selected = false;
-				currentPage = 1;
-				loadRecordSummariesCurrentPage();
+				resetCurrentFilter();
+				loadRecordSummaries();
 			}
 		}
 		
@@ -253,8 +272,7 @@ package org.openforis.collect.presenter {
 			var oldFilter:Array = currentKeyValuesFilter;
 			currentKeyValuesFilter = null;
 			if(oldFilter != null) {
-				currentPage = 1;
-				loadRecordSummariesCurrentPage();
+				loadRecordSummaries();
 			}
 			closeFilterPopUp();
 		}
@@ -274,8 +292,7 @@ package org.openforis.collect.presenter {
 			} else {
 				currentKeyValuesFilter = null;
 			}
-			currentPage = 1;
-			loadRecordSummariesCurrentPage();
+			loadRecordSummaries();
 			closeFilterPopUp();
 		}
 		
@@ -283,16 +300,27 @@ package org.openforis.collect.presenter {
 		 * Loads records summaries for active root entity
 		 * */
 		protected function loadRecordSummariesHandler(event:UIEvent):void {
+			if ( event.obj != null && event.obj.firstAccess ) {
+				resetCurrentFilter();
+			}
 			var surveyProjectName:String = Application.activeSurvey.getProjectName();
-			var rootEntityLabel:String = Application.activeRootEntity.getLabelText();
+			var rootEntityLabel:String = Application.activeRootEntity.getInstanceOrHeadingLabelText();
 			_view.titleLabel.text = Message.get("list.title", [surveyProjectName, rootEntityLabel]);
 			updateDataGrid();
-			currentPage = 1;
-			loadRecordSummariesCurrentPage();
+			loadRecordSummaries();
 		}
 		
 		protected function reloadRecordSummariesHandler(event:UIEvent):void {
-			loadRecordSummariesCurrentPage();
+			reloadRecordSummaries();
+		}
+		
+		protected function reloadRecordSummaries():void {
+			loadRecordSummaries(_view.paginationBar.offset);
+		}
+		
+		protected function resetCurrentFilter():void {
+			currentKeyValuesFilter = null;
+			_view.openFilterPopUpButton.selected = false;
 		}
 		
 		protected function updateDataGrid():void {
@@ -301,14 +329,14 @@ package org.openforis.collect.presenter {
 			_view.dataGrid.columns = columns;
 		}
 		
-		protected function loadRecordSummariesCurrentPage():void {
-			_view.paginationBar.currentPageText.text = new String(currentPage);
+		protected function loadRecordSummaries(offset:int = 0):void {
+			if ( offset == 0 ) {
+				_view.paginationBar.showPage(1);
+			}
+			//_view.paginationBar.currentPageText.text = new String(currentPage);
 			
 			_view.currentState = ListView.INACTIVE_STATE;
 			_view.paginationBar.currentState = PaginationBar.LOADING_STATE;
-			
-			//offset starts from 0
-			var offset:int = (currentPage - 1) * MAX_RECORDS_PER_PAGE;
 			
 			var responder:IResponder = new AsyncResponder(getRecordsSummaryResultHandler, faultHandler);
 			var rootEntityName:String = Application.activeRootEntity.name;
@@ -319,78 +347,24 @@ package org.openforis.collect.presenter {
 		
 		protected function getRecordsSummaryResultHandler(event:ResultEvent, token:Object = null):void {
 			var result:Object = event.result;
-			var records:ListCollectionView = result.records;
-			totalRecords = result.count as int;
-			totalPages = Math.ceil(totalRecords / MAX_RECORDS_PER_PAGE);
 			
-			_view.dataGrid.dataProvider = records;
+			_view.dataGrid.dataProvider = IList(result.records);
 			_view.dataGrid.setSortedColumns(currentSortFields);
 			_view.currentState = ListView.DEFAULT_STATE;
 			
-			updatePaginationBar();
+			_view.paginationBar.totalRecords = result.count;
 			
-			if(totalRecords == 0 && currentKeyValuesFilter != null) {
+			if(result.totalCount == 0 && currentKeyValuesFilter != null) {
 				AlertUtil.showMessage("list.filter.noRecordsFound");
 			}
 		}
 		
 		protected function deleteRecordResultHandler(event:ResultEvent, token:Object = null):void {
-			loadRecordSummariesCurrentPage();
+			reloadRecordSummaries();
 		}
 
-		protected function updatePaginationBar():void {
-			var recordsFromPosition:int = ((currentPage - 1) * MAX_RECORDS_PER_PAGE) + 1;
-			var recordsToPosition:int = recordsFromPosition + _view.dataGrid.dataProvider.length - 1;
-			
-			//calculate pagination bar state
-			if(totalRecords == 0) {
-				//no records found
-				_view.paginationBar.currentState = PaginationBar.NO_PAGES_STATE;
-			} else if(totalPages == 1) {
-				//showing a single page
-				_view.paginationBar.currentState = PaginationBar.SINGLE_PAGE_STATE;
-			} else if(currentPage == 1) {
-				//showing first page
-				_view.paginationBar.currentState = PaginationBar.FIRST_PAGE_STATE;
-			} else if(currentPage == totalPages) {
-				//showing last page
-				_view.paginationBar.currentState = PaginationBar.LAST_PAGE_STATE;
-			} else {
-				//showing a page in the middle
-				_view.paginationBar.currentState = PaginationBar.MIDDLE_PAGE_STATE;
-			}
-		}
-		
-		/**
-		 * Pagination bar events
-		 * */
-		protected function firstPageClickHandler(event:Event):void {
-			currentPage = 1;
-			loadRecordSummariesCurrentPage();
-		}
-		
-		protected function previousPageClickHandler(event:Event):void {
-			if(currentPage > 1) {
-				currentPage --;
-				loadRecordSummariesCurrentPage();
-			}
-		}
-		
-		protected function nextPageClickHandler(event:Event):void {
-			if(currentPage < totalPages) {
-				currentPage ++;
-				loadRecordSummariesCurrentPage();
-			}
-		}
-		
-		protected function lastPageClickHandler(event:Event):void {
-			currentPage = totalPages;
-			loadRecordSummariesCurrentPage();
-		}
-		
-		protected function goToPageClickHandler(event:Event):void {
-			//currentPage = _view.paginationBar.goToPageStepper.value;
-			loadRecordSummariesCurrentPage();
+		protected function summaryPageChangeHandler(event:PaginationBarEvent):void {
+			loadRecordSummaries(event.offset);
 		}
 		
 		protected function dataGridSortChangingHandler(event:GridSortEvent):void {
@@ -399,7 +373,7 @@ package org.openforis.collect.presenter {
 			var oldSortFields:IList = currentSortFields;
 			currentSortFields = RecordSummaryDataGrid.createRecordSummarySortFields(event.newSortFields, oldSortFields);;
 			
-			loadRecordSummariesCurrentPage();
+			reloadRecordSummaries();
 		}
 		
 		

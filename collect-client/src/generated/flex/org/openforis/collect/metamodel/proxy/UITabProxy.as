@@ -6,13 +6,16 @@
  */
 
 package org.openforis.collect.metamodel.proxy {
+	import org.openforis.collect.Application;
 
     [Bindable]
     [RemoteClass(alias="org.openforis.collect.metamodel.proxy.UITabProxy")]
     public class UITabProxy extends UITabProxyBase {
 		
-		public function getLabelText(language:String="en"):String {
-			var result:String = LanguageSpecificTextProxy.getLocalizedText(this.labels, language);
+		public function get labelText():String {
+			var langCode:String = Application.localeLanguageCode;
+			var defaultLanguage:Boolean = Application.activeSurvey.defaultLanguageCode == langCode;
+			var result:String = LanguageSpecificTextProxy.getLocalizedText(this.labels, langCode, defaultLanguage);
 			return result;
 		}
 		

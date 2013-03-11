@@ -11,18 +11,16 @@
 	<packaging>jar</packaging>
 	
 	<properties>
-		<geotools.version>2.6.5</geotools.version>
 		<jooq.version>2.0.5</jooq.version>
 		<jooq-codegen.version>2.0.1</jooq-codegen.version>
 	</properties>
 
-	<repositories>
-		<repository>
-			<id>osgeo</id>
-			<name>Open Source Geospatial Foundation Repository</name>
-			<url>http://download.osgeo.org/webdav/geotools/</url>
-		</repository>
-	</repositories>
+    <repositories>
+      <repository>
+        <id>gbif-all</id>
+        <url>http://repository.gbif.org/content/groups/gbif</url>
+      </repository>
+    </repositories>
 
 	<build>
 		<plugins>
@@ -188,7 +186,7 @@
 		            </configuration>
 		          </execution>
 		    	</executions>
-		    </plugin>			
+		    </plugin>
 		</plugins>
 		<pluginManagement>
 			<plugins>
@@ -282,6 +280,10 @@
 
 	<dependencies>
 		<dependency>
+          <groupId>org.openforis.commons</groupId>
+          <artifactId>commons-io</artifactId>
+        </dependency>
+        <dependency>
 			<groupId>org.openforis.idm</groupId>
 			<artifactId>idm-api</artifactId>
 		</dependency>
@@ -317,33 +319,12 @@
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
 		</dependency>
-		<!-- GeoTools -->
 		<dependency>
-			<groupId>org.geotools</groupId>
-			<artifactId>gt-main</artifactId>
-			<version>${geotools.version}</version>
+		  <groupId>org.jooq</groupId>
+		  <artifactId>jooq</artifactId>
+		  <version>${jooq.version}</version>
+          <scope>provided</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.geotools</groupId>
-			<artifactId>gt-metadata</artifactId>
-			<version>${geotools.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.geotools</groupId>
-			<artifactId>gt-referencing</artifactId>
-			<version>${geotools.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.geotools</groupId>
-			<artifactId>gt-epsg-wkt</artifactId>
-			<version>${geotools.version}</version>
-		</dependency>
-		<dependency> 
-			<groupId>org.jooq</groupId> 
-			<artifactId>jooq</artifactId > 
-			<version>2.5.0</version> 
-			<scope>provided</scope>
-		</dependency> 
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-tx</artifactId>
@@ -367,6 +348,11 @@
 			<artifactId>lucene-core</artifactId>
 			<version>3.6.1</version>
 		</dependency>
+        <dependency>
+            <groupId>org.gbif</groupId>
+            <artifactId>ecat-common</artifactId>
+            <version>1.6</version>
+        </dependency>
 		
 		<!--  TEST DEPENDENCIES -->
 		<dependency>

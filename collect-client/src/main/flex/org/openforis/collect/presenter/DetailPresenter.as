@@ -62,10 +62,9 @@ package org.openforis.collect.presenter {
 		 * Active record changed
 		 * */
 		internal function activeRecordChangedListener(event:UIEvent):void {
+			var preview:Boolean = Application.preview;
 			var activeRecord:RecordProxy = Application.activeRecord;
-			var step:CollectRecord$Step = activeRecord.step;
 			var version:ModelVersionProxy = activeRecord.version;
-			var rootEntityDefn:EntityDefinitionProxy = Application.activeRootEntity;
 			var rootEntity:EntityProxy = activeRecord.rootEntity;
 			rootEntity.updateKeyText();
 			updateRecordKeyLabel();
@@ -74,18 +73,27 @@ package org.openforis.collect.presenter {
 			} else {
 				_rootEntityKeyTextChangeWatcher.reset(rootEntity);
 			}
-			_view.formVersionText.text = version.getLabelText();
+			_view.formVersionContainer.visible = version != null;
+			if ( version != null ) {
+				_view.formVersionText.text = version.getLabelText();
+			}
+			var step:CollectRecord$Step = activeRecord.step;
 			_view.currentPhaseText.text = getStepLabel(step);
 			
 			var user:UserProxy = Application.user;
-			var canSubmit:Boolean = user.canSubmit(activeRecord);
+			var canSubmit:Boolean = !preview && user.canSubmit(activeRecord);
+			var canReject:Boolean = !preview && user.canReject(activeRecord);
+			var canSave:Boolean = !preview && Application.activeRecordEditable;
+			
+			_view.header.visible = _view.header.includeInLayout = !preview;
 			_view.submitButton.visible = _view.submitButton.includeInLayout = canSubmit;
-			
-			var canReject:Boolean = user.canReject(activeRecord);
 			_view.rejectButton.visible = _view.rejectButton.includeInLayout = canReject;
+			if ( canReject ) {
+				_view.rejectButton.label = step == CollectRecord$Step.ANALYSIS ? Message.get("edit.unlock"): Message.get("edit.reject");
+			}
+			_view.saveButton.visible = canSave;
 			
-			_view.saveButton.visible = Application.activeRecordEditable;
-			
+			var rootEntityDefn:EntityDefinitionProxy = Application.activeRootEntity;
 			var form:FormContainer = null;
 			if (_view.formsContainer.contatinsForm(version,rootEntityDefn)){
 				_view.currentState = DetailView.EDIT_STATE;
@@ -97,20 +105,18 @@ package org.openforis.collect.presenter {
 				_view.formsContainer.addForm(form, version, rootEntityDefn);
 				_view.currentState = DetailView.EDIT_STATE;
 			}
-			
 			form = _view.formsContainer.setActiveForm(version, rootEntityDefn);
 			form.record = activeRecord;
 		}
 		
 		protected function recordSavedHandler(event:ApplicationEvent):void {
-			var rootEntityLabel:String = Application.activeRootEntity.getLabelText()
-			_view.recordSavedMessage.text = Message.get("edit.recordSaved", [rootEntityLabel]);
-			_view.recordSavedMessage.show();
+			var rootEntityLabel:String = Application.activeRootEntity.getInstanceOrHeadingLabelText()
+			_view.messageDisplay.show(Message.get("edit.recordSaved", [rootEntityLabel]));
 		}
 		
 		protected function updateRecordKeyLabel(event:Event = null):void {
 			var result:String;
-			var rootEntityLabel:String = Application.activeRootEntity.getLabelText();
+			var rootEntityLabel:String = Application.activeRootEntity.getInstanceOrHeadingLabelText();
 			var keyText:String = Application.activeRecord.rootEntity.keyText;
 			if(StringUtil.isBlank(keyText) && isNaN(Application.activeRecord.id)) {
 				result = Message.get('edit.newRecordKeyLabel', [rootEntityLabel]);
@@ -221,7 +227,7 @@ package org.openforis.collect.presenter {
 		
 		internal function promoteRecordResultHandler(event:ResultEvent, token:Object = null):void {
 			var rootEntity:EntityDefinitionProxy = Application.activeRootEntity;
-			var rootEntityLabel:String = rootEntity.getLabelText();
+			var rootEntityLabel:String = rootEntity.getInstanceOrHeadingLabelText();
 			var r:RecordProxy = Application.activeRecord;
 			var keyLabel:String = r.rootEntity.keyText;
 			var actualStep:CollectRecord$Step = getNextStep(r.step);
@@ -234,7 +240,7 @@ package org.openforis.collect.presenter {
 		
 		internal function rejectRecordResultHandler(event:ResultEvent, token:Object = null):void {
 			var rootEntity:EntityDefinitionProxy = Application.activeRootEntity;
-			var rootEntityLabel:String = rootEntity.getLabelText();
+			var rootEntityLabel:String = rootEntity.getInstanceOrHeadingLabelText();
 			var r:RecordProxy = Application.activeRecord;
 			var keyLabel:String = r.rootEntity.keyText;
 			var actualStep:CollectRecord$Step = getPreviousStep(r.step);
@@ -250,7 +256,9 @@ package org.openforis.collect.presenter {
 		}
 		
 		protected function stageKeyDownHandler(event:KeyboardEvent):void {
-			if ( Application.activeRecordEditable && event.ctrlKey && event.keyCode == Keyboard.S ) {
+			//save record pressing CTRL + s
+			if ( !Application.preview && Application.activeRecordEditable && 
+					event.ctrlKey && event.keyCode == Keyboard.S ) {
 				performSaveActiveRecord();
 			}
 		}

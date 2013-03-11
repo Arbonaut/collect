@@ -12,7 +12,6 @@ import javax.servlet.http.HttpSession;
 
 import org.openforis.collect.persistence.SurveyImportException;
 import org.openforis.collect.web.controller.upload.UploadItem;
-import org.openforis.idm.metamodel.xml.InvalidIdmlException;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,13 +29,13 @@ public class DataImportController {
 
 	//private static Log LOG = LogFactory.getLog(DataImportController.class);
 
-	private static final String EXPORT_PATH = "import";
+	private static final String IMPORT_PATH = "import";
 
 	private static final String FILE_NAME = "data_import.zip";
 	
 	@RequestMapping(value = "/uploadData.htm", method = RequestMethod.POST)
 	public @ResponseBody String uploadData(UploadItem uploadItem, BindingResult result, HttpServletRequest request, @RequestParam String sessionId) 
-			throws IOException, InvalidIdmlException, SurveyImportException {
+			throws IOException, SurveyImportException {
 		File file = creteTempFile(request, sessionId);
 		writeToFile(uploadItem, file);
 		return "ok";
@@ -45,7 +44,7 @@ public class DataImportController {
 	private File creteTempFile(HttpServletRequest request, String sessionId) throws IOException {
 		HttpSession session = request.getSession();
 		ServletContext servletContext = session.getServletContext();
-		String importRealPath = servletContext.getRealPath(EXPORT_PATH);
+		String importRealPath = servletContext.getRealPath(IMPORT_PATH);
 		File importRootDirectory = new File(importRealPath);
 		File importDirectory = new File(importRootDirectory, sessionId);
 		if ( ! importDirectory.exists() ) {

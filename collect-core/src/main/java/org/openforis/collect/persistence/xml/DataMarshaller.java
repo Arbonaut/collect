@@ -16,6 +16,7 @@ import org.openforis.collect.model.User;
 import org.openforis.idm.metamodel.AttributeDefinition;
 import org.openforis.idm.metamodel.EntityDefinition;
 import org.openforis.idm.metamodel.FieldDefinition;
+import org.openforis.idm.metamodel.ModelVersion;
 import org.openforis.idm.metamodel.NodeDefinition;
 import org.openforis.idm.model.Attribute;
 import org.openforis.idm.model.Entity;
@@ -30,6 +31,8 @@ import org.xmlpull.v1.XmlSerializer;
  * @author S. Ricci
  */
 public class DataMarshaller {
+	
+	private static final String INDENT_FEATURE = "http://xmlpull.org/v1/doc/features.html#indent-output";
 
 	private static final String RECORD_VERSION_ATTRIBUTE = "version";
 	private static final String RECORD_STEP_ATTRIBUTE = "step";
@@ -44,6 +47,7 @@ public class DataMarshaller {
 	public void write(CollectRecord record, Writer out) throws IOException, XmlPullParserException {
 		XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
 		XmlSerializer serializer = factory.newSerializer();
+		serializer.setFeature(INDENT_FEATURE, true);
 		serializer.setOutput(out);
 		serializer.startDocument("UTF-8", true);
 		
@@ -51,7 +55,10 @@ public class DataMarshaller {
 		String rootEntityName = rootEntity.getName();
         serializer.startTag(null, rootEntityName);
         
-        serializer.attribute(null, RECORD_VERSION_ATTRIBUTE, record.getVersion().getName());
+        ModelVersion version = record.getVersion();
+        if ( version != null ) {
+        	serializer.attribute(null, RECORD_VERSION_ATTRIBUTE, version.getName());
+        }
         serializer.attribute(null, RECORD_STEP_ATTRIBUTE, Integer.toString(record.getStep().getStepNumber()));
         if ( record.getState() != null ) {
             serializer.attribute(null, STATE_ATTRIBUTE, record.getState().getCode());

@@ -5,11 +5,12 @@ import static org.openforis.collect.persistence.jooq.Tables.OFC_USER_ROLE;
 import static org.openforis.collect.persistence.jooq.tables.OfcRecord.OFC_RECORD;
 import static org.openforis.collect.persistence.jooq.tables.OfcSurvey.OFC_SURVEY;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.jooq.Record;
 import org.jooq.Result;
 import org.jooq.SQLDialect;
@@ -20,6 +21,7 @@ import org.openforis.collect.model.CollectSurvey;
 import org.openforis.collect.model.SurveySummary;
 import org.openforis.collect.persistence.jooq.DialectAwareJooqFactory;
 import org.openforis.idm.metamodel.Survey;
+import org.openforis.idm.metamodel.xml.IdmlParseException;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -29,7 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Transactional
 public class SurveyDao extends SurveyBaseDao {
-	// private final Log LOG = LogFactory.getLog(SurveyDao.class);
+	private final Log LOG = LogFactory.getLog(SurveyDao.class);
 
 	@Transactional
 	public void importModel(Survey survey) throws SurveyImportException {
@@ -122,10 +124,14 @@ public class SurveyDao extends SurveyBaseDao {
 		query.execute();
 		Result<Record> result = query.getResult();
 
-		System.out.println("Checking survey");
+		if ( LOG.isDebugEnabled() ) {
+			LOG.debug("Checking survey");
+		}
 		if (result.isEmpty()) { // we should insert it now			
 			surveyId = jf.nextval(OFC_SURVEY_ID_SEQ).intValue();
-			System.out.println("    Survey " +  name + " not exist. Inserting with ID = " + surveyId );
+			if ( LOG.isDebugEnabled() ) {
+				LOG.debug("    Survey " +  name + " not exist. Inserting with ID = " + surveyId );
+			}
 			jf.insertInto(OFC_SURVEY).set(OFC_SURVEY.ID, surveyId)
 					.set(OFC_SURVEY.NAME, survey.getName())
 					.set(OFC_SURVEY.URI, survey.getUri())
@@ -136,7 +142,9 @@ public class SurveyDao extends SurveyBaseDao {
 			Record record = result.get(0);			
 			surveyId = record.getValueAsInteger(OFC_SURVEY.ID);			
 			survey.setId(surveyId);
-			System.out.println("    Survey " +  name + " exist. Updating with ID = " + surveyId );
+			if ( LOG.isDebugEnabled() ) {
+				LOG.debug("    Survey " +  name + " exist. Updating with ID = " + surveyId );
+			}
 			jf.update(OFC_SURVEY)
 					.set(OFC_SURVEY.IDML, Factory.val(idml, SQLDataType.CLOB))
 					.set(OFC_SURVEY.NAME, survey.getName())
@@ -147,19 +155,18 @@ public class SurveyDao extends SurveyBaseDao {
 	}
 	
 	@Override
-	protected <T extends CollectSurvey> T processSurveyRow(Record row) {
+	protected CollectSurvey processSurveyRow(Record row) {
 		try {
 			if (row == null) {
 				return null;
 			}
 			String idml = row.getValueAsString(OFC_SURVEY.IDML);
-			T survey = unmarshalIdml(idml);
+			CollectSurvey survey = unmarshalIdml(idml);
 			survey.setId(row.getValueAsInteger(OFC_SURVEY.ID));
 			survey.setName(row.getValue(OFC_SURVEY.NAME));
 			return survey;
-		} catch (IOException e) {
-			throw new RuntimeException(
-					"Error deserializing IDML from database", e);
+		} catch (IdmlParseException e) {
+			throw new RuntimeException("Error deserializing IDML from database", e);
 		}
 	}
 	

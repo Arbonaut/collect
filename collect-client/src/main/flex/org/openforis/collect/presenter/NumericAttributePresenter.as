@@ -6,7 +6,6 @@ package org.openforis.collect.presenter {
 	
 	import org.openforis.collect.client.ClientFactory;
 	import org.openforis.collect.metamodel.proxy.NumberAttributeDefinitionProxy;
-	import org.openforis.collect.metamodel.proxy.NumberAttributeDefinitionProxy$Type;
 	import org.openforis.collect.metamodel.proxy.UnitProxy;
 	import org.openforis.collect.remoting.service.UpdateRequest;
 	import org.openforis.collect.remoting.service.UpdateRequestOperation;
@@ -67,18 +66,18 @@ package org.openforis.collect.presenter {
 		}
 		
 		protected function createUpdateUnitOperation():UpdateRequestOperation {
-			var numberAttrDefn:NumberAttributeDefinitionProxy = NumberAttributeDefinitionProxy(view.attributeDefinition);
+			var attrDefn:NumberAttributeDefinitionProxy = NumberAttributeDefinitionProxy(view.attributeDefinition);
 			var result:UpdateRequestOperation = null;
 			if(view.unitInputField != null) {
 				result = view.unitInputField.presenter.createUpdateValueOperation();
-			} else if ( numberAttrDefn.defaultUnit != null ) {
+			} else if ( attrDefn.defaultUnit != null ) {
 				result = new UpdateRequestOperation();
 				result.method = UpdateRequestOperation$Method.UPDATE;
 				result.parentEntityId = view.attribute.parentId;
 				result.nodeName = view.attributeDefinition.name;
 				result.nodeId = view.attribute.id;
-				result.fieldIndex = 1;
-				result.value = numberAttrDefn.defaultUnit.name;
+				result.fieldIndex = 2;
+				result.value = String(attrDefn.defaultUnit.id);
 			}
 			return result;
 		}
@@ -89,11 +88,8 @@ package org.openforis.collect.presenter {
 		
 		protected function initRestriction():void {
 			var numberAttrDefn:NumberAttributeDefinitionProxy = NumberAttributeDefinitionProxy(view.attributeDefinition);
-			if(numberAttrDefn.type == NumberAttributeDefinitionProxy$Type.INTEGER) {
-				view.numericInputField.restrict = IntegerInputField.RESTRICTION_PATTERN;
-			} else {
-				view.numericInputField.restrict = NumericInputField.RESTRICTION_PATTERN;
-			}
+			view.numericInputField.restrict = numberAttrDefn.integer ? IntegerInputField.RESTRICTION_PATTERN: 
+				NumericInputField.RESTRICTION_PATTERN;
 		}
 		
 		override protected function initViewState():void {
@@ -104,7 +100,7 @@ package org.openforis.collect.presenter {
 					if ( view.attributeDefinition.parentLayout == UIUtil.LAYOUT_FORM ) {
 						view.currentState = NumericAttributeRenderer.SINGLE_UNIT_STATE;
 						var unit:UnitProxy = UnitProxy(units.getItemAt(0));
-						view.unitLabel.text = unit.name;
+						view.unitLabel.text = unit.getAbbreviation();
 					} else {
 						view.currentState = NumericAttributeRenderer.NO_UNIT_STATE;
 					}
@@ -112,7 +108,7 @@ package org.openforis.collect.presenter {
 					view.currentState = NumericAttributeRenderer.MULTIPLE_UNIT_STATE;
 					view.unitInputField.dataProvider = units;
 					if(attrDefn.defaultUnit != null) {
-						view.unitInputField.defaultValue = attrDefn.defaultUnit.name;
+						view.unitInputField.defaultValue = String(attrDefn.defaultUnit.id);
 					}
 				}
 			}

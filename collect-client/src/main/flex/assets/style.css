@@ -44,6 +44,34 @@ s|Button.logout {
 	skin-class: ClassReference('org.openforis.collect.ui.skin.LogoutButtonSkin');
 }
 
+/* Home Page */
+.introWelcomeText {
+	fontSize: 25px;
+	fontWeight: bold;
+	textAlign: center;
+}
+.introText {
+	fontSize: 15px;
+	textAlign: justify;
+}
+.errorText {
+	fontSize: 18px;
+	fontWeight: bold;
+}
+.functionList{
+	/*skin-class: ClassReference('org.openforis.collect.ui.skin.FunctionListSkin');*/
+	borderVisible: false;
+}
+.functionLabel {
+	fontSize: 20;
+	fontWeight: bold;
+	paddingBottom: 15;
+	paddingTop: 15;
+	paddingRight: 5;
+	paddingLeft: 5;
+}
+/* end of Home Page */
+
 s|ToggleButton.filter {
 	icon: Embed(source='assets/images/filter.png');
 	cornerRadius: 5;
@@ -53,11 +81,12 @@ view|Footer {
 	padding-bottom: 5;
 }
 
-detail|RecordSavedMessage {
-	skin-class: ClassReference('org.openforis.collect.ui.skin.RecordSavedMessageSkin');
+component|MessageDisplay {
+	skin-class: ClassReference('org.openforis.collect.ui.skin.MessageDisplaySkin');
 	backgroundColor: haloBlue;
 }
-detail|RecordSavedMessage s|Label {
+
+component|MessageDisplay s|Label {
 	color: white;
 	fontSize: 12;
 	fontWeight: bold;
@@ -68,10 +97,9 @@ detail|RecordSavedMessage s|Label {
 	fontWeight: bold;
 }
 
-.appVersionLabel, .appVersionText {
-	font-style: italic;
-	font-size: 9;
-	padding-bottom: 5;
+.appVersionLabel, .appVersionText, .loggedAsLabel {
+	fontStyle: italic;
+	fontSize: 9;
 }
 
 .currentPhase {
@@ -108,8 +136,12 @@ mx|Alert {
 
 }*/
 
-component|BlockingMessagePopUp, component|SelectVersionPopUp, input|CodeListDialog, component|DataExportPopUp, 
-	component|BackupPopUp, component|DataImportPopUp, user|UserManagementPopUp {
+component|BlockingMessagePopUp, 
+	component|BackupPopUp, component|DataExportPopUp, component|DataImportPopUp, 
+	component|SelectVersionPopUp, component|SpeciesImportPopUp, 
+	component|SurveySelectionPopUp, 
+	input|CodeListDialog, 
+	user|UserManagementPopUp {
 	skin-class: ClassReference("org.openforis.collect.ui.skin.TitleWindowSkin");
 	title-style-name: dialogHeaderStyle;
 	border-color: #000000;
@@ -120,7 +152,7 @@ component|BlockingMessagePopUp, component|SelectVersionPopUp, input|CodeListDial
 	background-alpha: 1.0;
 }
 
-component|BlockingMessagePopUp, component|SelectVersionPopUp, input|CodeListDialog, component|DataExportPopUp, component|BackupPopUp {
+component|BlockingMessagePopUp, component|SurveySelectionPopUp, component|SelectVersionPopUp, input|CodeListDialog, component|DataExportPopUp, component|BackupPopUp, component|SpeciesImportPopUp {
 	showCloseButton: false;
 }
 
@@ -134,6 +166,14 @@ input|CodeListDialog s|CheckBox {
 
 component|ErrorListPopUp, component|DataImportNodeErrorsPopUp {
 	skinClass: ClassReference("org.openforis.collect.ui.skin.ResizableTitleWindowSkin");
+}
+
+
+input|NumericAttributeRenderer input|DropDownInputField s|DropDownList,
+	input|RangeAttributeRenderer input|DropDownInputField s|DropDownList,
+	input|CoordinateAttributeRenderer input|DropDownInputField s|DropDownList {
+	skinClass: ClassReference("org.openforis.collect.ui.skin.DropDownSkin");
+	dropDownWidth: 130;
 }
 
 mx|ToolTip { 
@@ -320,3 +360,4 @@ s|Label.dataGroupHeader {
 mx|PopUpMenuButton.settings {
 	popUpIcon: Embed(source='assets/images/settings.png');
 }
+

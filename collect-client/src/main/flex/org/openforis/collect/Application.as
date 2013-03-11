@@ -7,6 +7,7 @@ package org.openforis.collect {
 	import mx.core.FlexGlobals;
 	import mx.managers.CursorManager;
 	import mx.managers.ToolTipManager;
+	import mx.resources.Locale;
 	import mx.utils.URLUtil;
 	
 	import org.openforis.collect.i18n.Message;
@@ -29,13 +30,16 @@ package org.openforis.collect {
 		private static var _surveySummaries:IList;
 		
 		private static var _sessionId:String;
+		private static var _preview:Boolean;
 		private static var _activeSurvey:SurveyProxy;
 		private static var _activeRecord:RecordProxy;
 		private static var _activeRecordEditable:Boolean;
 		private static var _activeRootEntity:EntityDefinitionProxy;
 		private static var _activeStep:CollectRecord$Step;
 		private static var _serverOffline:Boolean;
-		private static var _locale:String;
+		private static var _locale:Locale;
+		private static var _localeString:String;
+		private static var _localeLanguageCode:String;
 		
 		private static var initialized:Boolean = false;
 		
@@ -60,13 +64,18 @@ package org.openforis.collect {
 		private static function initExternalInterface():void {
 			if(ExternalInterface.available) {
 				ExternalInterface.addCallback("isEditingRecord", isEditingRecord);
+				ExternalInterface.addCallback("isPreview", isPreview);
 				ExternalInterface.addCallback("getLeavingPageMessage", getLeavingPageMessage);
 			}
 		}
 		
 		//called from External Interface (javascript)
 		public static function isEditingRecord():Boolean {
-			return ! serverOffline && Application.activeRecord != null;
+			return ! (serverOffline || Application.activeRecord == null);
+		}
+		
+		public static function isPreview():Boolean {
+			return preview;
 		}
 		
 		public static function getLeavingPageMessage():String {
@@ -105,6 +114,15 @@ package org.openforis.collect {
 		
 		public static function set sessionId(value:String):void {
 			_sessionId = value;
+		}
+		
+		[Bindable]
+		public static function get preview():Boolean {
+			return _preview;
+		}
+		
+		public static function set preview(value:Boolean):void{
+			_preview = value;
 		}
 		
 		[Bindable]
@@ -171,14 +189,30 @@ package org.openforis.collect {
 		}
 		
 		[Bindable]
-		public static function get locale():String {
+		public static function get locale():Locale {
 			return _locale;
 		}
 		
-		public static function set locale(value:String):void {
+		public static function set locale(value:Locale):void {
 			_locale = value;
+			if ( _locale != null ) {
+				_localeString = value.toString();
+				_localeLanguageCode = _locale.language;
+			} else {
+				_localeString = null;
+				_localeLanguageCode = null;
+			}
 		}
 		
-
+		[Bindable(event="localeChange")]
+		public static function get localeString():String {
+			return _localeString;
+		}
+		
+		[Bindable(event="localeChange")]
+		public static function get localeLanguageCode():String {
+			return _localeLanguageCode;
+		}
+		
 	}
 }

@@ -3,16 +3,13 @@
  */
 package org.openforis.collect.manager;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.io.IOUtils;
 import org.openforis.collect.metamodel.ui.UIOptions;
 import org.openforis.collect.model.CollectSurvey;
 import org.openforis.collect.model.CollectSurveyContext;
@@ -20,10 +17,9 @@ import org.openforis.collect.model.SurveySummary;
 import org.openforis.collect.persistence.SurveyDao;
 import org.openforis.collect.persistence.SurveyImportException;
 import org.openforis.collect.persistence.SurveyWorkDao;
-import org.openforis.idm.metamodel.LanguageSpecificText;
+import org.openforis.commons.collection.CollectionUtils;
 import org.openforis.idm.metamodel.Survey;
-import org.openforis.idm.metamodel.xml.InvalidIdmlException;
-import org.openforis.idm.util.CollectionUtil;
+import org.openforis.idm.metamodel.xml.IdmlParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,6 +30,10 @@ import org.springframework.transaction.annotation.Transactional;
  */
 public class SurveyManager {
 
+	@Autowired
+	private SamplingDesignManager samplingDesignManager;
+	@Autowired
+	private SpeciesManager speciesManager;
 	@Autowired
 	private SurveyDao surveyDao;
 	@Autowired
@@ -51,31 +51,6 @@ public class SurveyManager {
 		surveysByName = new HashMap<String, CollectSurvey>();
 		surveysByUri = new HashMap<String, CollectSurvey>();
 	}
-	
-	public void setSurveyDao(SurveyDao surveyDao){
-		this.surveyDao = surveyDao;
-	}
-	
-	public SurveyDao getSurveyDao(){
-		return this.surveyDao;
-	}
-	
-	public void setSurveyWorkDao(SurveyWorkDao surveyWorkDao){
-		this.surveyWorkDao = surveyWorkDao;
-	}
-	
-	public SurveyWorkDao getSurveyWorkDao(){
-		return this.surveyWorkDao;
-	}
-	
-	public void setCollectSurveyContext(CollectSurveyContext collectSurveyContext){
-		this.collectSurveyContext = collectSurveyContext;
-		this.surveyDao.init(collectSurveyContext);
-	}
-	
-	public CollectSurveyContext getCollectSurveyContext(){
-		return this.collectSurveyContext;
-	}
 
 	@Transactional
 	protected void init() {
@@ -88,23 +63,39 @@ public class SurveyManager {
 		surveysByUri.clear();
 		surveys = surveyDao.loadAll();
 		for (CollectSurvey survey : surveys) {
-			initSurvey(survey);
+			addToCache(survey);
 		}
 	}
 
-	private void initSurvey(CollectSurvey survey) {
+	private void addToCache(CollectSurvey survey) {
+		if ( ! surveys.contains(survey) ) {
+			surveys.add(survey);
+		}
 		surveysById.put(survey.getId(), survey);
 		surveysByName.put(survey.getName(), survey);
 		surveysByUri.put(survey.getUri(), survey);
 	}
 	
+	protected void removeFromCache(CollectSurvey survey) {
+		surveys.remove(survey);
+		surveysById.remove(survey.getId());
+		surveysByName.remove(survey.getName());
+		surveysByUri.remove(survey.getUri());
+	}
+	
 	public List<CollectSurvey> getAll() {
-		return CollectionUtil.unmodifiableList(surveys);
+		return CollectionUtils.unmodifiableList(surveys);
 	}
 	
 	@Transactional
 	public CollectSurvey get(String name) {
 		CollectSurvey survey = surveysByName.get(name);
+		return survey;
+	}
+	
+	@Transactional
+	public CollectSurvey getById(int id) {
+		CollectSurvey survey = surveysById.get(id);
 		return survey;
 	}
 	
@@ -117,28 +108,20 @@ public class SurveyManager {
 	@Transactional
 	public void importModel(CollectSurvey survey) throws SurveyImportException {
 		surveyDao.importModel(survey);
-		if (surveys==null){
-			surveys = new ArrayList<CollectSurvey>();
-		}
-		surveys.add(survey);
-		initSurvey(survey);
+		addToCache(survey);
 	}
 	
 	@Transactional
 	public void updateModel(CollectSurvey survey) throws SurveyImportException {
 		//remove old survey from surveys cache
-		String name = survey.getName();
-		Iterator<CollectSurvey> iterator = surveys.iterator();
-		while ( iterator.hasNext() ) {
-			CollectSurvey oldSurvey = iterator.next();
-			if (oldSurvey.getName().equals(name)) {
-				iterator.remove();
-				break;
-			}
+		CollectSurvey oldSurvey = surveysByName.get(survey.getName());
+		if ( oldSurvey != null ) {
+			removeFromCache(oldSurvey);
+		} else {
+			throw new SurveyImportException("Could not find survey to update");
 		}
 		surveyDao.updateModel(survey);
-		surveys.add(survey);
-		initSurvey(survey);
+		addToCache(survey);
 	}
 
 	@Transactional
@@ -146,7 +129,7 @@ public class SurveyManager {
 		List<SurveySummary> summaries = new ArrayList<SurveySummary>();
 		for (Survey survey : surveys) {
 			Integer id = survey.getId();
-			String projectName = getProjectName(survey, lang);
+			String projectName = survey.getProjectName(lang);
 			String name = survey.getName();
 			String uri = survey.getUri();
 			SurveySummary summary = new SurveySummary(id, name, uri, projectName);
@@ -178,15 +161,8 @@ public class SurveyManager {
 		}
 	}
 
-	public CollectSurvey unmarshalSurvey(InputStream is) throws InvalidIdmlException {
-		try {
-			byte[] bytes = IOUtils.toByteArray(is);
-			surveyDao.validateAgainstSchema(bytes);
-			String idml = new String(bytes, "UTF-8");
-			return surveyDao.unmarshalIdml(idml);
-		} catch (IOException e) {
-			throw new InvalidIdmlException("Error reading input stream");
-		}
+	public CollectSurvey unmarshalSurvey(InputStream is) throws IdmlParseException {
+		return surveyDao.unmarshalIdml(is);
 	}
 	
 	@Transactional
@@ -194,7 +170,7 @@ public class SurveyManager {
 		List<SurveySummary> summaries = new ArrayList<SurveySummary>();
 		for (Survey survey : surveys) {
 			Integer id = survey.getId();
-			String projectName = getProjectName(survey, lang);
+			String projectName = survey.getProjectName(lang);
 			String name = survey.getName();
 			SurveySummary summary = new SurveySummary(id, name, projectName);
 			summaries.add(summary);
@@ -210,19 +186,17 @@ public class SurveyManager {
 	
 	@Transactional
 	public CollectSurvey loadPublishedSurveyForEdit(String uri) {
-		CollectSurvey survey = (CollectSurvey) surveyDao.loadByUri(uri);
-		CollectSurvey tempSurvey = surveyWorkDao.loadByUri(uri);
-		if ( tempSurvey != null ) {
-			return tempSurvey;
-		} else {
-			CollectSurvey surveyWork = createSurveyWork(survey);
-			return surveyWork;
+		CollectSurvey surveyWork = surveyWorkDao.loadByUri(uri);
+		if ( surveyWork == null ) {
+			CollectSurvey publishedSurvey = (CollectSurvey) surveyDao.loadByUri(uri);
+			surveyWork = createSurveyWork(publishedSurvey);
 		}
+		return surveyWork;
 	}
 
 	public CollectSurvey createSurveyWork() {
 		CollectSurvey survey = (CollectSurvey) collectSurveyContext.createSurvey();
-		UIOptions uiOptions = new UIOptions();
+		UIOptions uiOptions = survey.createUIOptions();
 		survey.addApplicationOptions(uiOptions);
 		return survey;
 	}
@@ -231,6 +205,7 @@ public class SurveyManager {
 //		CollectSurvey surveyWork = survey.clone();
 		CollectSurvey surveyWork = survey;
 		surveyWork.setId(null);
+		surveyWork.setPublished(true);
 		return surveyWork;
 	}
 	
@@ -239,6 +214,13 @@ public class SurveyManager {
 		Integer id = survey.getId();
 		if ( id == null ) {
 			surveyWorkDao.insert(survey);
+			CollectSurvey publishedSurvey = surveyDao.loadByUri(survey.getUri());
+			if ( publishedSurvey != null ) {
+				int surveyWorkId = survey.getId();
+				int publishedSurveyId = publishedSurvey.getId();
+				samplingDesignManager.duplicateSamplingDesignForWork(publishedSurveyId, surveyWorkId);
+				speciesManager.duplicateTaxonomyForWork(publishedSurveyId, surveyWorkId);
+			}
 		} else {
 			surveyWorkDao.update(survey);
 		}
@@ -255,24 +237,11 @@ public class SurveyManager {
 			initSurveysCache();
 		}
 		if ( surveyWorkId != null ) {
+			int publishedSurveyId = survey.getId();
+			samplingDesignManager.publishSamplingDesign(surveyWorkId, publishedSurveyId);
+			speciesManager.publishTaxonomies(surveyWorkId, publishedSurveyId);
 			surveyWorkDao.delete(surveyWorkId);
 		}
 	}
 	
-	private String getProjectName(Survey survey, String lang) {
-		List<LanguageSpecificText> names = survey.getProjectNames();
-		if (names == null || names.size() == 0) {
-			return "";
-		} else if (names.size() == 1) {
-			return names.get(0).getText();
-		} else {
-			for (LanguageSpecificText text : names) {
-				if (lang.equalsIgnoreCase(text.getLanguage())) {
-					return text.getText();
-				}
-			}
-		}
-		return "";
-	}
-
 }

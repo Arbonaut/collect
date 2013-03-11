@@ -4,13 +4,14 @@
 				  xmlns:mx="library://ns.adobe.com/flex/mx" 
 				  xmlns:input="org.openforis.collect.ui.component.input.*" 
 				  xmlns:detail="org.openforis.collect.ui.component.detail.*"
-				  inputFields="{[codeTextInput, scientificNameTextInput, vernacularNameTextInput, languageCodeTextInput, languageVarietyTextInput]}" 
+				  inputFields="{[codeTextInput, scientificNameTextInput, vernacularNameTextInput, languageAutocomplete, languageVarietyTextInput]}" 
 				  xmlns:component="org.openforis.collect.ui.component.*"
 				  >
 	<fx:Script>
 		<![CDATA[
 			import org.openforis.collect.i18n.Message;
 			import org.openforis.collect.presenter.TaxonAttributePresenter;
+			import org.openforis.collect.ui.UIBuilder;
 			
 			override protected function initPresenter():void {
 				presenter = new TaxonAttributePresenter(this);
@@ -23,7 +24,7 @@
 		<s:State name="vertical" />
 	</detail:states>
 	
-	<s:HGroup includeIn="horizontal" gap="6">
+	<s:HGroup includeIn="horizontal" gap="{UIBuilder.COMPOSITE_ATTRIBUTE_H_GAP}">
 		<input:StringInputField id="codeTextInput" 
 								includeIn="horizontal"
 								attributeDefinition="{attributeDefinition}"
@@ -51,7 +52,7 @@
 								maxChars="255"
 								width="100" 
 								/>
-		<input:LanguageCodeAutoComplete id="languageCodeTextInput" 
+		<input:LanguageAutoComplete id="languageAutocomplete" 
 								includeIn="horizontal"
 								attributeDefinition="{attributeDefinition}"
 								parentEntity="{parentEntity}"
@@ -72,7 +73,7 @@
 	</s:HGroup>
 	
 	<s:VGroup includeIn="vertical">
-		<s:Label styleName="bold" text="{attributeDefinition.getLabelText()}" />
+		<s:Label styleName="bold" text="{attributeDefinition.getInstanceOrHeadingLabelText()}" />
 		<s:VGroup>
 			<s:HGroup>
 				<s:Label width="{subLabelWidth}" styleName="bold" text="{Message.get('edit.taxon.code')}"/>
@@ -88,7 +89,7 @@
 			</s:HGroup>
 			<s:HGroup>
 				<s:Label width="{subLabelWidth}" styleName="bold" text="{Message.get('edit.taxon.languageCode')}"/>
-				<fx:Reparent target="languageCodeTextInput" includeIn="vertical" />
+				<fx:Reparent target="languageAutocomplete" includeIn="vertical" />
 			</s:HGroup>
 			<s:HGroup>
 				<s:Label width="{subLabelWidth}" styleName="bold" text="{Message.get('edit.taxon.languageVariety')}"/>

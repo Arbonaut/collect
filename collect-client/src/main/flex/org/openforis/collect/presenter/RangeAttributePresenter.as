@@ -77,8 +77,8 @@ package org.openforis.collect.presenter {
 				result.parentEntityId = view.attribute.parentId;
 				result.nodeName = view.attributeDefinition.name;
 				result.nodeId = view.attribute.id;
-				result.fieldIndex = 2;
-				result.value = attrDefn.defaultUnit.name;
+				result.fieldIndex = 3;
+				result.value = String(attrDefn.defaultUnit.id);
 			}
 			return result;
 		}
@@ -91,7 +91,7 @@ package org.openforis.collect.presenter {
 					if ( attrDefn.parentLayout == UIUtil.LAYOUT_FORM ) {
 						view.currentState = RangeAttributeRenderer.SINGLE_UNIT_STATE;
 						var unit:UnitProxy = UnitProxy(units.getItemAt(0));
-						view.unitLabel.text = unit.name;
+						view.unitLabel.text = unit.getAbbreviation();
 					} else {
 						view.currentState = RangeAttributeRenderer.NO_UNIT_STATE;
 					}
@@ -99,7 +99,7 @@ package org.openforis.collect.presenter {
 					view.currentState = RangeAttributeRenderer.MULTIPLE_UNIT_STATE;
 					view.unitInputField.dataProvider = units;
 					if(attrDefn.defaultUnit != null) {
-						view.unitInputField.defaultValue = attrDefn.defaultUnit.name;
+						view.unitInputField.defaultValue = String(attrDefn.defaultUnit.id);
 					}
 				}
 			}
