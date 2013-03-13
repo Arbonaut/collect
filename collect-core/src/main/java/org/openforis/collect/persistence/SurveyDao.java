@@ -1,7 +1,6 @@
 package org.openforis.collect.persistence;
 
 import static org.openforis.collect.persistence.jooq.Sequences.OFC_SURVEY_ID_SEQ;
-import static org.openforis.collect.persistence.jooq.Tables.OFC_USER_ROLE;
 import static org.openforis.collect.persistence.jooq.tables.OfcRecord.OFC_RECORD;
 import static org.openforis.collect.persistence.jooq.tables.OfcSurvey.OFC_SURVEY;
 
@@ -18,6 +17,7 @@ import org.jooq.SelectConditionStep;
 import org.jooq.impl.Factory;
 import org.jooq.impl.SQLDataType;
 import org.openforis.collect.model.CollectSurvey;
+import org.openforis.collect.model.CollectSurveyContext;
 import org.openforis.collect.model.SurveySummary;
 import org.openforis.collect.persistence.jooq.DialectAwareJooqFactory;
 import org.openforis.idm.metamodel.Survey;
@@ -33,6 +33,10 @@ import org.springframework.transaction.annotation.Transactional;
 public class SurveyDao extends SurveyBaseDao {
 	private final Log LOG = LogFactory.getLog(SurveyDao.class);
 
+	public SurveyDao(CollectSurveyContext surveyCtx){
+		super.init(surveyCtx);
+	}
+	
 	@Transactional
 	public void importModel(Survey survey) throws SurveyImportException {
 		String name = survey.getName();

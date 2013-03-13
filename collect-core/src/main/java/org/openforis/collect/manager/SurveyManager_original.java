@@ -17,7 +17,6 @@ import org.openforis.collect.model.SurveySummary;
 import org.openforis.collect.persistence.SurveyDao;
 import org.openforis.collect.persistence.SurveyImportException;
 import org.openforis.collect.persistence.SurveyWorkDao;
-import org.openforis.collect.persistence.TaxonomyDao;
 import org.openforis.commons.collection.CollectionUtils;
 import org.openforis.idm.metamodel.Survey;
 import org.openforis.idm.metamodel.xml.IdmlParseException;
@@ -53,23 +52,6 @@ public class SurveyManager {
 		surveysByUri = new HashMap<String, CollectSurvey>();
 	}
 
-	public void setSurveyDao(SurveyDao surveyDao){
-		this.surveyDao = surveyDao;
-		init();
-	}
-	
-	public SurveyDao getSurveyDao(){
-		return this.surveyDao;
-	}	
-	
-	public void setSurveyWorkDao(SurveyWorkDao surveyWorkDao){
-		this.surveyWorkDao = surveyWorkDao;
-	}
-	
-	public void setCollectSurveyContext(CollectSurveyContext collectSurveyContext){
-		this.collectSurveyContext = collectSurveyContext;
-	}
-	
 	@Transactional
 	protected void init() {
 		initSurveysCache();
