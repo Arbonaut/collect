@@ -69,8 +69,6 @@
 						</goals>
 					</execution>
 				</executions>
-				<configuration>
-				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.tomcat.maven</groupId>

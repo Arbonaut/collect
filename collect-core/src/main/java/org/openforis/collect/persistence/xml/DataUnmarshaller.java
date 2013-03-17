@@ -34,7 +34,7 @@ public class DataUnmarshaller {
 		this.handler = handler;
 	}
 	
-	private ParseRecordResult parse(InputSource source) {
+	private ParseRecordResult parse(InputSource source) throws IOException {
 		ParseRecordResult result = new ParseRecordResult();
 		try {
 			XMLReader reader = createReader();
@@ -52,9 +52,10 @@ public class DataUnmarshaller {
 			} else {
 				result.setFailures(failures);
 			}
-		} catch (Exception e) {
-			String message = e.getMessage();
-			NodeUnmarshallingError error = new NodeUnmarshallingError(message);
+		} catch (ParserConfigurationException e) {
+			throw new RuntimeException(e);
+		} catch (SAXException e) {
+			NodeUnmarshallingError error = new NodeUnmarshallingError(e.toString());
 			result.setFailures(Arrays.asList(error));
 		}
 		return result;
@@ -91,7 +92,7 @@ public class DataUnmarshaller {
 		}
 	}
 	
-	public ParseRecordResult parse(Reader reader) {
+	public ParseRecordResult parse(Reader reader) throws IOException {
 		InputSource is = new InputSource(reader);
 		return parse(is);
 	}

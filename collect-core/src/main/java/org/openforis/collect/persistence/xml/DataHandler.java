@@ -86,6 +86,7 @@ public class DataHandler extends DefaultHandler {
 	
 	@Override
 	public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
+		String name = localName.isEmpty() ? qName : localName;
 		try {
 			if ( failed ) {
 				return; 
@@ -94,14 +95,14 @@ public class DataHandler extends DefaultHandler {
 				return;
 			} else if ( node == null ) {
 				// if root element, read audit data, version, and 
-				startRecord(localName, attributes);
+				startRecord(name, attributes);
 			} else {
 				this.content = new StringBuilder();
 				this.attributes = attributes;
 				if ( node instanceof Entity ) {
-					startChildNode(localName, attributes);
+					startChildNode(name, attributes);
 				} else if ( node instanceof Attribute ) {
-					startAttributeField(localName, attributes);
+					startAttributeField(name, attributes);
 				}
 			}
 		} catch ( NullPointerException e ) {
@@ -223,7 +224,8 @@ public class DataHandler extends DefaultHandler {
 
 	protected void fail(String msg) {
 		String path = getPath();
-		NodeUnmarshallingError nodeErrorItem = new NodeUnmarshallingError(record.getStep(), path, msg);
+		Step step = record == null ? null : record.getStep();
+		NodeUnmarshallingError nodeErrorItem = new NodeUnmarshallingError(step, path, msg);
 		failures.add(nodeErrorItem);
 		failed = true;
 	}

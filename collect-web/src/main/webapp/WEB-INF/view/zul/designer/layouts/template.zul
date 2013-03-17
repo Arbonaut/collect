@@ -1,4 +1,3 @@
-<?page docType="html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd""?>
 <zk>
   <zscript><![CDATA[
       import java.awt.image.*;
@@ -7,7 +6,7 @@
       import org.openforis.collect.manager.LogoManager;
       import org.zkoss.spring.*;
       
-      static final int TOP_RIGHT_CORNER_LOGO_POSITION = 1;
+      final int TOP_RIGHT_CORNER_LOGO_POSITION = 1;
       
       void updateHeaderImages() {
         BufferedImage content = loadLogoData(TOP_RIGHT_CORNER_LOGO_POSITION);
@@ -24,11 +23,20 @@
         if ( data == null ) {
         	return null;
         } else {
-          ByteArrayInputStream is = new ByteArrayInputStream(data);
-          BufferedImage content = ImageIO.read(is);
-          return content;
+        	return toImage(data);
         }
       }
+      
+      BufferedImage toImage(byte[] data) {
+    	  try {
+            ByteArrayInputStream is = new ByteArrayInputStream(data);
+            BufferedImage content = ImageIO.read(is);
+            return content;
+        	} catch ( IOException e ) {
+        		return null;
+        	}
+      }
+      
   ]]></zscript>
 	<style src="/assets/designer_style.css" />
     <hlayout hflex="1" vflex="1" onCreate="updateHeaderImages()" >
