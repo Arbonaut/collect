@@ -145,7 +145,6 @@ public abstract class MappingJooqFactory<E> extends DialectAwareJooqFactory {
 
 	private int nextId() {
 		if (this.getDialect().equals(SQLDialect.SQLITE)){
-			System.out.println("SEQUENCE"+idSequence.getName().substring(0,idSequence.getName().length()-7));
 			return this.getNextIdValue(idSequence.getName().substring(0,idSequence.getName().length()-7));
 		} else {
 			return nextval(idSequence).intValue();	

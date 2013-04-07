@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 
+import org.jooq.Field;
 import org.jooq.Record;
 import org.jooq.Result;
 import org.jooq.SQLDialect;
@@ -48,25 +49,17 @@ public class DialectAwareJooqFactory extends Factory {
 	}
 
 	public int getNextIdValue(String tableName){
-		//System.out.println("NO SEQUENCES!!!!!!!!!!!!!!!!!!!!!!"+tableName);
-		SelectLimitStep q = this.select()
-				.from(tableName)
-				.orderBy(Factory.literal("id").desc());
+		Field<?> field = Factory.field("id");
+		SelectLimitStep q = this.select(Factory.max(field).add(1).as("next_id")).from(tableName);
 		Result<Record> result = q.fetch();
-//		System.out.println("QUERY:"+q.toString());
-//		System.out.println("ILOSCwierszy"+result.size());
-//		System.out.println(result.formatCSV());
-//		System.out.println("NAJWYZSZE ID"+result.get(0).getValueAsString(0));
-//		System.out.println("NAJWYZSZE ID"+result.get(0).getValueAsString(1));
-//		System.out.println("NAJWYZSZE ID"+result.get(0).getValueAsString(2));
-//		if (result.size()==0){
-//			this.execute("insert into ofc_user_role_id_seq values (1);");	
-//		}
-//		else {
-//			this.execute("UPDATE ofc_user_role_id_seq SET nextval = 2;");
-//		}
 		if (!result.isEmpty())
-			return result.get(0).getValueAsInteger(0)+1;
+			if (result.get(0).getValueAsInteger(0)!=null){
+				return result.get(0).getValueAsInteger(0);
+			}				
+			else {
+				return 1;
+			}
+				
 		else 
 			return 1;
     }

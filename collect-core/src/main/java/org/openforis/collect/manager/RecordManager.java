@@ -544,7 +544,7 @@ public class RecordManager {
 			if ( rootEntity.isRequired(keyAttrDefn.getName()) ) {
 				String keyValue = rootEntityKeyValues.get(i);
 				if ( StringUtils.isBlank(keyValue) ) {
-					throw new MissingRecordKeyException();
+					//throw new MissingRecordKeyException();
 				}
 			}
 		}
