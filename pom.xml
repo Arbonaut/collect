@@ -4,13 +4,15 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.openforis.collect</groupId>
 	<artifactId>collect</artifactId>
-	<version>3.0-Alpha2-SNAPSHOT</version>
+	<version>3.0-CR1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<modules>
 		<module>collect-core</module>
-		<module>collect-flex</module>
-		<module>collect-rdb</module>
+		<module>collect-server</module>
+		<module>collect-client</module>
+		<module>collect-web</module>
+		<module>collect-assembly</module>
 	</modules>
 
 	<properties>
@@ -21,20 +23,25 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 	</properties>
 
-	<distributionManagement>
-		<repository>
-			<id>releases</id>
-			<name>Repository with internal releases</name>
-			<url>http://ldvfo01:9000/nexus/content/repositories/releases</url>
-		</repository>
-	</distributionManagement>
+  <distributionManagement>
+    <repository>
+      <id>openforis-releases-repository</id>
+      <name>Open Foris Repository</name>
+      <url>http://www.openforis.org/nexus/content/repositories/releases/</url>
+    </repository>
+    <snapshotRepository>
+      <id>openforis-snapshots-repository</id>
+      <name>Open Foris Snapshots Repository</name>
+      <url>http://www.openforis.org/nexus/content/repositories/snapshots/</url>
+    </snapshotRepository>
+  </distributionManagement>
 
 	<scm>
-	    <connection>scm:git:git@github.com:openforis/collect.git</connection>
-	    <url>scm:git:git@github.com:openforis/collect.git</url>
-		<developerConnection>scm:git:git@github.com:openforis/collect.git</developerConnection>
-	  <tag>HEAD</tag>
-  </scm>
+    <connection>scm:git:git@github.com:openforis/collect.git</connection>
+    <url>scm:git:git@github.com:openforis/collect.git</url>
+	  <developerConnection>scm:git:git@github.com:openforis/collect.git</developerConnection>
+  	<tag>HEAD</tag>
+	</scm>
 	
 	<build>
 		<plugins>
@@ -48,17 +55,17 @@
 						<file>
 							<name>.settings/org.eclipse.core.resources.prefs</name>
 							<content>
-				                <![CDATA[eclipse.preferences.version=1${line.separator}encoding/<project>=${project.build.sourceEncoding}${line.separator}]]>
+                <![CDATA[eclipse.preferences.version=1${line.separator}encoding/<project>=${project.build.sourceEncoding}${line.separator}]]>
 							</content>
 						</file>
 					</additionalConfig>
 				</configuration>
 			</plugin>
 			<plugin>
-		        <groupId>org.apache.maven.plugins</groupId>
-		        <artifactId>maven-release-plugin</artifactId>
-		        <version>2.3</version>
-	      	</plugin>	
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-release-plugin</artifactId>
+        <version>2.3</version>
+    	</plugin>
 		</plugins>
 		<pluginManagement>
 			<plugins>
@@ -77,9 +84,43 @@
 						<encoding>${project.build.sourceEncoding}</encoding>
 					</configuration>
 				</plugin>
+				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself. -->
+				<plugin>
+					<groupId>org.eclipse.m2e</groupId>
+					<artifactId>lifecycle-mapping</artifactId>
+					<version>1.0.0</version>
+					<configuration>
+						<lifecycleMappingMetadata>
+							<pluginExecutions>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>org.sonatype.flexmojos</groupId>
+										<artifactId>flexmojos-maven-plugin</artifactId>
+										<versionRange>[4.0-pre-alpha-1,)</versionRange>
+										<goals>
+											<goal>compile-swf</goal>
+											<goal>test-compile</goal>
+											<goal>copy-flex-resources</goal>
+											<goal>generate</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore/>
+										<!-- 
+										Must ignore since m2e fails on copy-flex-resource
+										https://issues.sonatype.org/browse/MNGECLIPSE-1375
+										 -->
+<!-- 										<execute /> -->
+									</action>
+								</pluginExecution>
+							</pluginExecutions>
+						</lifecycleMappingMetadata>
+					</configuration>
+				</plugin>
 			</plugins>
 		</pluginManagement>
 	</build>
+  
 	<repositories>
 		<!-- <repository> -->
 		<!-- <id>flex-mojos-repository</id> -->
@@ -91,6 +132,16 @@
 		<!-- <enabled>true</enabled> -->
 		<!-- </snapshots> -->
 		<!-- </repository> -->
+		<repository>
+      <id>openforis-releases-repository</id>
+      <name>Open Foris Repository</name>
+      <url>http://www.openforis.org/nexus/content/repositories/releases/</url>
+    </repository>
+    <repository>
+      <id>openforis-snapshots-repository</id>
+      <name>Open Foris Snapshots Repository</name>
+      <url>http://www.openforis.org/nexus/content/repositories/snapshots/</url>
+    </repository>
 		<repository>
 			<id>spring-snapshot</id>
 			<url>http://maven.springframework.org/snapshot/</url>
@@ -126,8 +177,13 @@
 	</pluginRepositories>
 
 	<dependencyManagement>
-		<dependencies>
-			<dependency>
+    <dependencies>
+      <dependency>
+        <groupId>org.openforis.commons</groupId>
+        <artifactId>commons-io</artifactId>
+        <version>0.0.4-SNAPSHOT</version>
+      </dependency>
+      <dependency>
 				<groupId>junit</groupId>
 				<artifactId>junit</artifactId>
 				<version>4.10</version>
@@ -170,17 +226,17 @@
 			<dependency>
 				<groupId>org.openforis.idm</groupId>
 				<artifactId>idm-api</artifactId>
-				<version>3.0-Alpha2-SNAPSHOT</version>
+				<version>3.0-Alpha6</version>
 			</dependency>
 			<dependency>
 				<groupId>org.openforis.idm</groupId>
 				<artifactId>idm-transform</artifactId>
-				<version>3.0-Alpha2-SNAPSHOT</version>
+				<version>3.0-Alpha6</version>
 			</dependency>
 			<dependency>
 				<groupId>org.openforis.idm</groupId>
 				<artifactId>idm-test</artifactId>
-				<version>3.0-Alpha2-SNAPSHOT</version>
+				<version>3.0-Alpha6</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
@@ -227,11 +283,6 @@
 				<groupId>org.springframework.security</groupId>
 				<artifactId>spring-security-cas-client</artifactId>
 				<version>${spring-security.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.sun.xml.bind</groupId>
-				<artifactId>jaxb-impl</artifactId>
-				<version>2.2.2</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

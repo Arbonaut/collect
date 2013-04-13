@@ -9,11 +9,14 @@ import java.util.List;
 import org.jooq.Record;
 import org.jooq.Result;
 import org.jooq.Select;
+import org.jooq.SelectQuery;
+import org.jooq.SortField;
 import org.jooq.StoreQuery;
 import org.jooq.TableField;
 import org.openforis.collect.persistence.jooq.MappingJooqDaoSupport;
 import org.openforis.collect.persistence.jooq.MappingJooqFactory;
 import org.openforis.idm.model.species.Taxon;
+import org.openforis.idm.model.species.Taxon.TaxonRank;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -22,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Transactional
 public class TaxonDao extends MappingJooqDaoSupport<Taxon, TaxonDao.JooqFactory> {
+	
 	public TaxonDao() {
 		super(TaxonDao.JooqFactory.class);
 	}
@@ -68,6 +72,46 @@ public class TaxonDao extends MappingJooqDaoSupport<Taxon, TaxonDao.JooqFactory>
 		return entities;
 	}
 	
+	public int countTaxons(int taxonomyId) {
+		JooqFactory f = getMappingJooqFactory();
+		SelectQuery q = f.selectCountQuery();
+		q.addConditions(OFC_TAXON.TAXONOMY_ID.equal(taxonomyId));
+		Record r = q.fetchOne();
+		return r.getValueAsInteger(0);
+	}
+	
+	public List<Taxon> loadTaxons(int taxonomyId, int offset, int maxRecords) {
+		return loadTaxons(taxonomyId, offset, maxRecords, OFC_TAXON.SCIENTIFIC_NAME.asc());
+	}
+	
+	public List<Taxon> loadTaxonsForTreeBuilding(int taxonomyId) {
+		return loadTaxons(taxonomyId, 0, Integer.MAX_VALUE, OFC_TAXON.PARENT_ID.asc().nullsFirst());
+	}
+	
+	public List<Taxon> loadTaxons(int taxonomyId, int offset, int maxRecords, SortField<?> sortField) {
+		JooqFactory jf = getMappingJooqFactory();
+		SelectQuery q = jf.selectQuery();	
+		q.addFrom(OFC_TAXON);
+		q.addConditions(OFC_TAXON.TAXONOMY_ID.equal(taxonomyId));
+		//always order by SCIENTIFIC_NAME to avoid pagination issues
+		q.addOrderBy(sortField);
+		
+		//add limit
+		q.addLimit(offset, maxRecords);
+		
+		//fetch results
+		Result<Record> result = q.fetch();
+		
+		return jf.fromResult(result);
+	}
+	
+	public void deleteByTaxonomy(int taxonomyId) {
+		JooqFactory jf = getMappingJooqFactory();
+		jf.delete(OFC_TAXON)
+			.where(OFC_TAXON.TAXONOMY_ID.equal(taxonomyId))
+			.execute();
+	}
+	
 	protected static class JooqFactory extends MappingJooqFactory<Taxon> {
 
 		private static final long serialVersionUID = 1L;
@@ -83,7 +127,9 @@ public class TaxonDao extends MappingJooqDaoSupport<Taxon, TaxonDao.JooqFactory>
 			t.setParentId(r.getValue(OFC_TAXON.PARENT_ID));
 			t.setCode(r.getValueAsString(OFC_TAXON.CODE));
 			t.setScientificName(r.getValue(OFC_TAXON.SCIENTIFIC_NAME));
-			t.setTaxonomicRank(r.getValue(OFC_TAXON.TAXON_RANK));
+			String taxonRankName = r.getValue(OFC_TAXON.TAXON_RANK);
+			TaxonRank taxonRank = TaxonRank.fromName(taxonRankName);
+			t.setTaxonRank(taxonRank);
 			t.setTaxonomyId(r.getValue(OFC_TAXON.TAXONOMY_ID));
 			t.setStep(r.getValue(OFC_TAXON.STEP));
 		}
@@ -95,7 +141,8 @@ public class TaxonDao extends MappingJooqDaoSupport<Taxon, TaxonDao.JooqFactory>
 			q.addValue(OFC_TAXON.PARENT_ID, t.getParentId());
 			q.addValue(OFC_TAXON.CODE, t.getCode());
 			q.addValue(OFC_TAXON.SCIENTIFIC_NAME, t.getScientificName());
-			q.addValue(OFC_TAXON.TAXON_RANK, t.getTaxonomicRank());
+			TaxonRank taxonRank = t.getTaxonRank();
+			q.addValue(OFC_TAXON.TAXON_RANK, taxonRank != null ? taxonRank.getName(): null);
 			q.addValue(OFC_TAXON.TAXONOMY_ID, t.getTaxonomyId());
 			q.addValue(OFC_TAXON.STEP, t.getStep());
 		}

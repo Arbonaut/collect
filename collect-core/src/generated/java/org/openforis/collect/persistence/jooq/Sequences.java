@@ -18,14 +18,19 @@ public final class Sequences {
 	public static final org.jooq.Sequence<java.lang.Long> OFC_RECORD_ID_SEQ = new org.jooq.impl.SequenceImpl<java.lang.Long>("ofc_record_id_seq", org.openforis.collect.persistence.jooq.Collect.COLLECT, org.jooq.impl.SQLDataType.BIGINT);
 
 	/**
-	 * The sequence collect.collect.ofc_schema_definition_id_seq
+	 * The sequence collect.collect.ofc_sampling_design_id_seq
 	 */
-	public static final org.jooq.Sequence<java.lang.Long> OFC_SCHEMA_DEFINITION_ID_SEQ = new org.jooq.impl.SequenceImpl<java.lang.Long>("ofc_schema_definition_id_seq", org.openforis.collect.persistence.jooq.Collect.COLLECT, org.jooq.impl.SQLDataType.BIGINT);
+	public static final org.jooq.Sequence<java.lang.Long> OFC_SAMPLING_DESIGN_ID_SEQ = new org.jooq.impl.SequenceImpl<java.lang.Long>("ofc_sampling_design_id_seq", org.openforis.collect.persistence.jooq.Collect.COLLECT, org.jooq.impl.SQLDataType.BIGINT);
 
 	/**
 	 * The sequence collect.collect.ofc_survey_id_seq
 	 */
 	public static final org.jooq.Sequence<java.lang.Long> OFC_SURVEY_ID_SEQ = new org.jooq.impl.SequenceImpl<java.lang.Long>("ofc_survey_id_seq", org.openforis.collect.persistence.jooq.Collect.COLLECT, org.jooq.impl.SQLDataType.BIGINT);
+
+	/**
+	 * The sequence collect.collect.ofc_survey_work_id_seq
+	 */
+	public static final org.jooq.Sequence<java.lang.Long> OFC_SURVEY_WORK_ID_SEQ = new org.jooq.impl.SequenceImpl<java.lang.Long>("ofc_survey_work_id_seq", org.openforis.collect.persistence.jooq.Collect.COLLECT, org.jooq.impl.SQLDataType.BIGINT);
 
 	/**
 	 * The sequence collect.collect.ofc_taxon_id_seq

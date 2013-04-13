@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 width="100%" 
+		 creationComplete="init();">
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.rpc.AsyncResponder;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			
+			import org.openforis.collect.Application;
+			import org.openforis.collect.client.ClientFactory;
+			import org.openforis.collect.client.LogoClient;
+			import org.openforis.collect.i18n.Message;
+			import org.openforis.collect.model.proxy.UserProxy;
+			import org.openforis.collect.ui.Images;
+			import org.openforis.collect.util.ApplicationConstants;
+
+			private function init():void  {
+				var client:LogoClient = ClientFactory.logoClient;
+				var logoResponder:AsyncResponder;
+				logoResponder = new AsyncResponder(logoResultHandler, logoFaultHandler);
+				client.loadLogo(logoResponder, ApplicationConstants.COUNTRY_LOGO_ID);
+			}
+			
+			protected function logoResultHandler(event:ResultEvent, token:Object):void {
+				var data:ByteArray = event.result as ByteArray;				
+				if ( data == null ) {
+					image.source = Images.DEFAULT_LOGO;
+				} else {
+					image.source = data;
+				}
+			}
+			
+			protected function logoFaultHandler(event:FaultEvent, token:Object = null):void {
+				//AlertUtil.showError('error.logoNotFound'); 
+				image.source = Images.DEFAULT_LOGO;
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<s:Group>
+        <s:Image source="@Embed(source='/assets/images/banner.jpg')"/>
+		<s:VGroup verticalCenter="0" 
+				  right="0" 
+				  paddingTop="5" 
+				  paddingBottom="5"
+				  paddingRight="5"
+				  paddingLeft="5">
+	        <s:Image id="image" 
+					 maxHeight="80"
+					 maxWidth="80"
+					 smooth="true" /> 
+		</s:VGroup>
+	</s:Group>
+	
+</s:Group>

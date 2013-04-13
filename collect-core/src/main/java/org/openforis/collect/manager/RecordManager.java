@@ -15,6 +15,8 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.openforis.collect.metamodel.ui.UIOptions;
+import org.openforis.collect.metamodel.ui.UIOptions.Layout;
 import org.openforis.collect.model.CollectRecord;
 import org.openforis.collect.model.CollectRecord.State;
 import org.openforis.collect.model.CollectRecord.Step;
@@ -43,6 +45,7 @@ import org.openforis.idm.model.Attribute;
 import org.openforis.idm.model.Code;
 import org.openforis.idm.model.CodeAttribute;
 import org.openforis.idm.model.Entity;
+import org.openforis.idm.model.EntityBuilder;
 import org.openforis.idm.model.Field;
 import org.openforis.idm.model.Node;
 import org.openforis.idm.model.NodePointer;
@@ -61,6 +64,8 @@ public class RecordManager {
 	
 	@Autowired
 	private RecordDao recordDao;
+
+	private RecordConverter recordConverter = new RecordConverter();
 	
 	private Map<Integer, RecordLock> locks;
 	
@@ -120,17 +125,24 @@ public class RecordManager {
 		isLockAllowed(user, recordId, sessionId, forceUnlock);
 		lock(recordId, user, sessionId, forceUnlock);
 		CollectRecord record = recordDao.load(survey, recordId, step);
+		recordConverter.convertToLatestVersion(record);
 		return record;
 	}
 	
 	@Transactional
 	public CollectRecord load(CollectSurvey survey, int recordId, int step) throws RecordPersistenceException {
 		CollectRecord record = recordDao.load(survey, recordId, step);
+		recordConverter.convertToLatestVersion(record);
 		return record;
 	}
 	
 	@Transactional
-	public List<CollectRecord> getSummaries(CollectSurvey survey, String rootEntity, String... keys) {
+	public List<CollectRecord> loadSummaries(CollectSurvey survey, String rootEntity) {
+		return loadSummaries(survey, rootEntity, (String[]) null);
+	}
+
+	@Transactional
+	public List<CollectRecord> loadSummaries(CollectSurvey survey, String rootEntity, String... keys) {
 		return recordDao.loadSummaries(survey, rootEntity, keys);
 	}
 	
@@ -144,8 +156,13 @@ public class RecordManager {
 	public int getRecordCount(CollectSurvey survey, String rootEntity, String... keyValues) {
 		Schema schema = survey.getSchema();
 		EntityDefinition rootEntityDefinition = schema.getRootEntityDefinition(rootEntity);
-		int count = recordDao.countRecords(rootEntityDefinition.getId(), keyValues);
+		int count = recordDao.countRecords(survey.getId(), rootEntityDefinition.getId(), keyValues);
 		return count;
+	}
+	
+	@Transactional
+	public boolean hasAssociatedRecords(int userId) {
+		return recordDao.hasAssociatedRecords(userId);
 	}
 
 	@Transactional
@@ -208,7 +225,7 @@ public class RecordManager {
 	 * @param record
 	 * @throws InvalidExpressionException 
 	 */
-	protected void applyDefaultValues(CollectRecord record) {
+	public void applyDefaultValues(CollectRecord record) {
 		Entity rootEntity = record.getRootEntity();
 		applyDefaultValues(rootEntity);
 	}
@@ -267,14 +284,28 @@ public class RecordManager {
 		recordDao.update( record );
 	}
 	
+	@Transactional
+	public void validate(CollectSurvey survey, User user, String sessionId, int recordId, Step step) throws RecordLockedException, MultipleEditException {
+		isLockAllowed(user, recordId, sessionId, true);
+		lock(recordId, user, sessionId, true);
+		CollectRecord record = recordDao.load(survey, recordId, step.getStepNumber());
+		Entity rootEntity = record.getRootEntity();
+		addEmptyNodes(rootEntity);
+		record.updateDerivedStates();
+		record.updateRootEntityKeyValues();
+		record.updateEntityCounts();
+		recordDao.update(record);
+		releaseLock(recordId);
+	}
+	
 	public Entity addEntity(Entity parentEntity, String nodeName) {
-		Entity entity = parentEntity.addEntity(nodeName);
+		Entity entity = EntityBuilder.addEntity(parentEntity, nodeName);
 		addEmptyNodes(entity);
 		return entity;
 	}
 
 	public Entity addEntity(Entity parentEntity, String nodeName, int idx) {
-		Entity entity = parentEntity.addEntity(nodeName, idx);
+		Entity entity = EntityBuilder.addEntity(parentEntity, nodeName, idx);
 		addEmptyNodes(entity);
 		return entity;
 	}
@@ -291,39 +322,50 @@ public class RecordManager {
 	public void addEmptyNodes(Entity entity) {
 		Record record = entity.getRecord();
 		ModelVersion version = record.getVersion();
-		
 		addEmptyEnumeratedEntities(entity);
 		EntityDefinition entityDefn = entity.getDefinition();
 		List<NodeDefinition> childDefinitions = entityDefn.getChildDefinitions();
-		for (NodeDefinition nodeDefn : childDefinitions) {
-			if(version.isApplicable(nodeDefn)) {
-				String name = nodeDefn.getName();
-				if(entity.getCount(name) == 0) {
-					int count = 0;
-					int toBeInserted = entity.getEffectiveMinCount(name);
-					if ( count == 0 && (nodeDefn instanceof AttributeDefinition || ! nodeDefn.isMultiple()) ) {
+		for (NodeDefinition childDefn : childDefinitions) {
+			if(version == null || version.isApplicable(childDefn)) {
+				String childName = childDefn.getName();
+				if(entity.getCount(childName) == 0) {
+					int toBeInserted = entity.getEffectiveMinCount(childName);
+					if ( toBeInserted <= 0 && childDefn instanceof AttributeDefinition || ! childDefn.isMultiple() ) {
 						//insert at least one node
 						toBeInserted = 1;
 					}
-					while(count < toBeInserted) {
-						if(nodeDefn instanceof AttributeDefinition) {
-							Node<?> createNode = nodeDefn.createNode();
-							entity.add(createNode);
-						} else if(nodeDefn instanceof EntityDefinition) {
-							addEntity(entity, name);
-						}
-						count ++;
-					}
+					addEmptyChildren(entity, childDefn, toBeInserted);
 				} else {
-					List<Node<?>> all = entity.getAll(name);
-					for (Node<?> node : all) {
-						if(node instanceof Entity) {
-							addEmptyNodes((Entity) node);
+					List<Node<?>> children = entity.getAll(childName);
+					for (Node<?> child : children) {
+						if(child instanceof Entity) {
+							addEmptyNodes((Entity) child);
 						}
 					}
 				}
 			}
 		}
+	}
+
+	protected int addEmptyChildren(Entity entity, NodeDefinition childDefn, int toBeInserted) {
+		String childName = childDefn.getName();
+		CollectSurvey survey = (CollectSurvey) entity.getSurvey();
+		UIOptions uiOptions = survey.getUIOptions();
+		int count = 0;
+		boolean multipleEntityFormLayout = childDefn instanceof EntityDefinition && childDefn.isMultiple() && 
+				uiOptions != null && uiOptions.getLayout((EntityDefinition) childDefn) == Layout.FORM;
+		if ( ! multipleEntityFormLayout ) {
+			while(count < toBeInserted) {
+				if(childDefn instanceof AttributeDefinition) {
+					Node<?> createNode = childDefn.createNode();
+					entity.add(createNode);
+				} else if(childDefn instanceof EntityDefinition ) {
+					addEntity(entity, childName);
+				}
+				count ++;
+			}
+		}
+		return count;
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -390,32 +432,35 @@ public class RecordManager {
 	
 	private void addEmptyEnumeratedEntities(Entity parentEntity) {
 		Record record = parentEntity.getRecord();
+		CollectSurvey survey = (CollectSurvey) parentEntity.getSurvey();
+		UIOptions uiOptions = survey.getUIOptions();
 		ModelVersion version = record.getVersion();
 		EntityDefinition parentEntityDefn = parentEntity.getDefinition();
 		List<NodeDefinition> childDefinitions = parentEntityDefn.getChildDefinitions();
 		for (NodeDefinition childDefn : childDefinitions) {
-			if(childDefn instanceof EntityDefinition && version.isApplicable(childDefn)) {
+			if ( childDefn instanceof EntityDefinition && (version == null || version.isApplicable(childDefn)) ) {
 				EntityDefinition childEntityDefn = (EntityDefinition) childDefn;
-				if(childEntityDefn.isMultiple() && childEntityDefn.isEnumerable()) {
+				boolean tableLayout = uiOptions == null || uiOptions.getLayout(childEntityDefn) == Layout.TABLE;
+				if(childEntityDefn.isMultiple() && childEntityDefn.isEnumerable() && tableLayout) {
 					addEmptyEnumeratedEntities(parentEntity, childEntityDefn);
 				}
 			}
 		}
 	}
 
-	private void addEmptyEnumeratedEntities(Entity parentEntity, EntityDefinition enuberableEntityDefn) {
+	private void addEmptyEnumeratedEntities(Entity parentEntity, EntityDefinition enumerableEntityDefn) {
 		Record record = parentEntity.getRecord();
 		ModelVersion version = record.getVersion();
-		String enumeratedEntityName = enuberableEntityDefn.getName();
-		CodeAttributeDefinition enumeratingCodeDefn = getEnumeratingKeyCodeAttribute(enuberableEntityDefn, version);
+		CodeAttributeDefinition enumeratingCodeDefn = enumerableEntityDefn.getEnumeratingKeyCodeAttribute(version);
 		if(enumeratingCodeDefn != null) {
+			String enumeratedEntityName = enumerableEntityDefn.getName();
 			CodeList list = enumeratingCodeDefn.getList();
 			List<CodeListItem> items = list.getItems();
 			for (int i = 0; i < items.size(); i++) {
 				CodeListItem item = items.get(i);
-				if(version.isApplicable(item)) {
+				if(version == null || version.isApplicable(item)) {
 					String code = item.getCode();
-					Entity enumeratedEntity = getEnumeratedEntity(parentEntity, enuberableEntityDefn, enumeratingCodeDefn, code);
+					Entity enumeratedEntity = getEnumeratedEntity(parentEntity, enumerableEntityDefn, enumeratingCodeDefn, code);
 					if( enumeratedEntity == null ) {
 						Entity addedEntity = addEntity(parentEntity, enumeratedEntityName, i);
 						//set the value of the key CodeAttribute
@@ -429,19 +474,6 @@ public class RecordManager {
 		}
 	}
 
-	private CodeAttributeDefinition getEnumeratingKeyCodeAttribute(EntityDefinition entity, ModelVersion version) {
-		List<AttributeDefinition> keys = entity.getKeyAttributeDefinitions();
-		for (AttributeDefinition key: keys) {
-			if(key instanceof CodeAttributeDefinition && version.isApplicable(key)) {
-				CodeAttributeDefinition codeDefn = (CodeAttributeDefinition) key;
-				if(codeDefn.getList().getLookupTable() == null) {
-					return codeDefn;
-				}
-			}
-		}
-		return null;
-	}
-	
 	private Entity getEnumeratedEntity(Entity parentEntity, EntityDefinition childEntityDefn, 
 			CodeAttributeDefinition enumeratingCodeAttributeDef, String value) {
 		List<Node<?>> children = parentEntity.getAll(childEntityDefn.getName());

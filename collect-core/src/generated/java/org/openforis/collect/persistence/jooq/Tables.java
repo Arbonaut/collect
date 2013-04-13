@@ -33,14 +33,19 @@ public final class Tables {
 	public static org.openforis.collect.persistence.jooq.tables.OfcRecord OFC_RECORD = org.openforis.collect.persistence.jooq.tables.OfcRecord.OFC_RECORD;
 
 	/**
-	 * The table collect.ofc_schema_definition
+	 * The table collect.ofc_sampling_design
 	 */
-	public static org.openforis.collect.persistence.jooq.tables.OfcSchemaDefinition OFC_SCHEMA_DEFINITION = org.openforis.collect.persistence.jooq.tables.OfcSchemaDefinition.OFC_SCHEMA_DEFINITION;
+	public static org.openforis.collect.persistence.jooq.tables.OfcSamplingDesign OFC_SAMPLING_DESIGN = org.openforis.collect.persistence.jooq.tables.OfcSamplingDesign.OFC_SAMPLING_DESIGN;
 
 	/**
 	 * The table collect.ofc_survey
 	 */
 	public static org.openforis.collect.persistence.jooq.tables.OfcSurvey OFC_SURVEY = org.openforis.collect.persistence.jooq.tables.OfcSurvey.OFC_SURVEY;
+
+	/**
+	 * The table collect.ofc_survey_work
+	 */
+	public static org.openforis.collect.persistence.jooq.tables.OfcSurveyWork OFC_SURVEY_WORK = org.openforis.collect.persistence.jooq.tables.OfcSurveyWork.OFC_SURVEY_WORK;
 
 	/**
 	 * The table collect.ofc_taxon

@@ -1,0 +1,110 @@
+<?component name="fieldErrorHandler" class="org.openforis.collect.designer.component.FieldErrorHandler"?>
+<?component name="multilanguageLabel" class="org.openforis.collect.designer.component.MultilanguageLabel" macroURI="/WEB-INF/view/zul/designer/component/multilanguage_label.zul"?>
+<zk>
+	<window 
+		title="${labels.survey.srs.$}" 
+		height="400px"
+		width="700px"
+		border="normal"
+		position="center" 
+		validationMessages="@id('vmsgs')"
+		apply="org.zkoss.bind.BindComposer"
+		viewModel="@id('vm') @init('org.openforis.collect.designer.viewmodel.SpatialReferenceSystemsVM')">
+		<borderlayout>
+			<west width="180px">
+				<borderlayout>
+					<center border="none">
+						<listbox id="itemsListBox"
+				        	selectedItem="@load(vm.selectedItem)"
+				        	model="@load(vm.items)"
+				        	onSelect="@command('selectionChanged', selectedItem=self.selectedItem.value)"
+				        	width="100%"
+				        	vflex="true">
+				        	<listhead>
+								<listheader label="" width="100%" />
+							</listhead>
+				            <template name="model">
+				                <listitem>
+				                    <listcell label="@load(each.id)" />
+				                </listitem>
+				            </template>
+				        </listbox>
+					</center>
+					<south border="none">
+				        <toolbar height="30px">
+				        	<toolbarbutton tooltiptext="${labels.global.add_item}" 
+                                    image="/assets/images/add.png"
+                                    onClick="@command('newItem')" />
+                            <toolbarbutton tooltiptext="${labels.global.delete_item}" 
+                                    image="/assets/images/delete.png"
+                                    disabled="@load(empty vm.selectedItem)" 
+                                    onClick="@command('deleteItem', item=vm.selectedItem)" />
+				        	<toolbarbutton tooltiptext="${labels.global.item.move_up}" 
+                                    image="/assets/images/arrow-up.png"
+									disabled="@load(vm.moveSelectedItemUpDisabled)" 
+						        	onClick="@command('moveSelectedItemUp')" />
+				        	<toolbarbutton tooltiptext="${labels.global.item.move_down}" 
+                                    image="/assets/images/arrow-down.png"
+									disabled="@load(vm.moveSelectedItemDownDisabled)" 
+						        	onClick="@command('moveSelectedItemDown')" />
+				        </toolbar>
+					</south>
+				</borderlayout>
+		    </west>
+	        <center>
+		        <div 
+		        	visible="@load(vm.editingItem)"
+                    sclass="form"
+					form="@id('fx') 
+						@load(vm.formObject) 
+                        @save(vm.formObject, before={'validate','applyChanges'})
+                        @validator('org.openforis.collect.designer.form.validator.SRSFormValidator')"
+					width="500px">
+					<grid>
+						<columns>
+							<column width="100px" />
+							<column />
+						</columns>
+						<rows>
+							<row>
+								<label value="${labels.survey.srs.id}:" />
+								<fieldErrorHandler message="@load(vmsgs['id'])">
+									<textbox width="150px" value="@bind(fx.id)" onChange="@command('applyChanges')" />
+								</fieldErrorHandler>
+							</row>
+							<row>
+								<multilanguageLabel value="${labels.survey.srs.label}" 
+                                  languageCode="@load(vm.currentLanguageCode)" />
+                                <fieldErrorHandler message="@load(vmsgs['label'])">
+									<textbox width="150px" value="@bind(fx.label)" onChange="@command('applyChanges')" />
+								</fieldErrorHandler>
+							</row>
+							<row>
+								<multilanguageLabel value="${labels.survey.srs.description}" 
+                                  languageCode="@load(vm.currentLanguageCode)" />
+                                <fieldErrorHandler message="@load(vmsgs['description'])">
+									<textbox width="300px" multiline="true" rows="4"
+                                      value="@bind(fx.description)" onChange="@command('applyChanges')" />
+								</fieldErrorHandler>
+							</row>
+							<row>
+								<label value="${labels.survey.srs.wkt}:" />
+                                <fieldErrorHandler message="@load(vmsgs['wellKnownText'])">
+									<textbox width="300px" value="@bind(fx.wellKnownText)" 
+										multiline="true" rows="10" cols="40"
+										onChange="@command('applyChanges')" />
+								</fieldErrorHandler>
+							</row>
+						</rows>
+					</grid>
+				</div>
+			</center>
+			<south>
+				<box align="center" width="100%">
+					<button label="${labels.global.ok}" 
+						onClick="@global-command('closeSRSManagerPopUp')" />
+				</box>
+			</south>
+		</borderlayout>
+    </window>
+</zk>

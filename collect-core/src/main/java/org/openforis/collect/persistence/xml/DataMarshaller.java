@@ -16,18 +16,23 @@ import org.openforis.collect.model.User;
 import org.openforis.idm.metamodel.AttributeDefinition;
 import org.openforis.idm.metamodel.EntityDefinition;
 import org.openforis.idm.metamodel.FieldDefinition;
+import org.openforis.idm.metamodel.ModelVersion;
 import org.openforis.idm.metamodel.NodeDefinition;
 import org.openforis.idm.model.Attribute;
 import org.openforis.idm.model.Entity;
 import org.openforis.idm.model.Field;
 import org.openforis.idm.model.Node;
 import org.openforis.idm.model.State;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlPullParserFactory;
 import org.xmlpull.v1.XmlSerializer;
 
 /**
  * @author S. Ricci
  */
 public class DataMarshaller {
+	
+	private static final String INDENT_FEATURE = "http://xmlpull.org/v1/doc/features.html#indent-output";
 
 	private static final String RECORD_VERSION_ATTRIBUTE = "version";
 	private static final String RECORD_STEP_ATTRIBUTE = "step";
@@ -35,13 +40,14 @@ public class DataMarshaller {
 	private static final String RECORD_CREATED_ATTRIBUTE = "created";
 	private static final String RECORD_MODIFIED_BY_ATTRIBUTE = "modified_by";
 	private static final String RECORD_MODIFIED_ATTRIBUTE = "modified";
-	private static final String DEFINITION_ID_ATTRIBUTE = "defn";
 	private static final String STATE_ATTRIBUTE = "state";
 	private static final String SYMBOL_ATTRIBUTE = "symbol";
 	private static final String REMARKS_ATTRIBUTE = "remarks";
 	
-	public void write(CollectRecord record, Writer out) throws IOException {
-		XmlSerializer serializer = new FastXmlSerializer();
+	public void write(CollectRecord record, Writer out) throws IOException, XmlPullParserException {
+		XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
+		XmlSerializer serializer = factory.newSerializer();
+		serializer.setFeature(INDENT_FEATURE, true);
 		serializer.setOutput(out);
 		serializer.startDocument("UTF-8", true);
 		
@@ -49,7 +55,10 @@ public class DataMarshaller {
 		String rootEntityName = rootEntity.getName();
         serializer.startTag(null, rootEntityName);
         
-        serializer.attribute(null, RECORD_VERSION_ATTRIBUTE, record.getVersion().getName());
+        ModelVersion version = record.getVersion();
+        if ( version != null ) {
+        	serializer.attribute(null, RECORD_VERSION_ATTRIBUTE, version.getName());
+        }
         serializer.attribute(null, RECORD_STEP_ATTRIBUTE, Integer.toString(record.getStep().getStepNumber()));
         if ( record.getState() != null ) {
             serializer.attribute(null, STATE_ATTRIBUTE, record.getState().getCode());
@@ -83,8 +92,6 @@ public class DataMarshaller {
 		String name = attr.getName();
 		serializer.startTag(null, name);
 		
-		writeDefinitionId(serializer, attr);
-		
 		writeState(serializer, attr);
 		
 		int cnt = attr.getFieldCount();
@@ -99,8 +106,6 @@ public class DataMarshaller {
 		
 		serializer.startTag(null, name);
 		
-		writeDefinitionId(serializer, entity);
-		
 		writeState(serializer, entity);
 		
 		writeChildren(serializer, entity);
@@ -114,12 +119,6 @@ public class DataMarshaller {
 			write(serializer, node);
 		}
 		writeEmptyNodes(serializer, rootEntity);
-	}
-
-	private void writeDefinitionId(XmlSerializer serializer, Node<?> node) throws IOException {
-		NodeDefinition defn = node.getDefinition();
-		Integer defnId = defn.getId();
-		serializer.attribute(null, DEFINITION_ID_ATTRIBUTE, defnId.toString());
 	}
 
 	private void writeState(XmlSerializer serializer, Node<?> node) throws IOException {
