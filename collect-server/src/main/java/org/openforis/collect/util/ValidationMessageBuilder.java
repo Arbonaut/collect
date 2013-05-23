@@ -32,6 +32,7 @@ import org.openforis.idm.metamodel.validation.NumberValueUnitValidator;
 import org.openforis.idm.metamodel.validation.NumericRangeUnitValidator;
 import org.openforis.idm.metamodel.validation.PatternCheck;
 import org.openforis.idm.metamodel.validation.RealRangeValidator;
+import org.openforis.idm.metamodel.validation.TaxonVernacularLanguageValidator;
 import org.openforis.idm.metamodel.validation.TimeValidator;
 import org.openforis.idm.metamodel.validation.UniquenessCheck;
 import org.openforis.idm.metamodel.validation.ValidationResult;
@@ -43,6 +44,7 @@ import org.openforis.idm.model.Entity;
 import org.openforis.idm.model.Field;
 import org.openforis.idm.model.Node;
 import org.openforis.idm.model.Record;
+import org.openforis.idm.model.TaxonAttribute;
 import org.openforis.idm.model.expression.ExpressionFactory;
 import org.openforis.idm.model.expression.ModelPathExpression;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -176,6 +178,14 @@ public class ValidationMessageBuilder {
 			} else {
 				key = "validation.incompleteTimeError";
 			}
+		} else if ( validator instanceof TaxonVernacularLanguageValidator ) {
+			TaxonAttribute taxonAttr = (TaxonAttribute) attribute;
+			if ( StringUtils.isNotBlank(taxonAttr.getVernacularName()) && 
+					StringUtils.isBlank(taxonAttr.getLanguageCode()) ) {
+				key = "validator.taxon.missingVernacularLanguage";
+			} else {
+				key = "validator.taxon.vernacularLanguageNotRequired";
+			}
 		} else if(validator instanceof UniquenessCheck) {
 			key = "validation.uniquenessError";
 		} else if(validator instanceof NumberValueUnitValidator || validator instanceof NumericRangeUnitValidator) {
@@ -212,27 +222,31 @@ public class ValidationMessageBuilder {
 	}
 	
 	protected String getComparisonCheckMessageArg(Attribute<?,?> attribute, String expression) {
-		String result = expression;
-		Record record = attribute.getRecord();
-		Survey survey = record.getSurvey();
-		Schema schema = survey.getSchema();
-		SurveyContext recordContext = record.getSurveyContext();
-		ExpressionFactory expressionFactory = recordContext.getExpressionFactory();
-		try {
-			Entity parentEntity = attribute.getParent();
-			EntityDefinition parentDefinition = parentEntity.getDefinition();
-			ModelPathExpression modelPathExpression = expressionFactory.createModelPathExpression(expression);
-			List<String> referencedPaths = modelPathExpression.getReferencedPaths();
-			for (String path : referencedPaths) {
-				String absolutePath = parentDefinition.getPath() + PATH_SEPARATOR + path;
-				NodeDefinition nodeDefinition = schema.getDefinitionByPath(absolutePath);
-				String label = getPrettyLabelText(nodeDefinition);
-				result = result.replaceAll(nodeDefinition.getName(), label);
+		if ( StringUtils.isNotBlank(expression) ) {
+			String result = expression;
+			Record record = attribute.getRecord();
+			Survey survey = record.getSurvey();
+			Schema schema = survey.getSchema();
+			SurveyContext recordContext = record.getSurveyContext();
+			ExpressionFactory expressionFactory = recordContext.getExpressionFactory();
+			try {
+				Entity parentEntity = attribute.getParent();
+				EntityDefinition parentDefinition = parentEntity.getDefinition();
+				ModelPathExpression modelPathExpression = expressionFactory.createModelPathExpression(expression);
+				List<String> referencedPaths = modelPathExpression.getReferencedPaths();
+				for (String path : referencedPaths) {
+					String absolutePath = parentDefinition.getPath() + PATH_SEPARATOR + path;
+					NodeDefinition nodeDefinition = schema.getDefinitionByPath(absolutePath);
+					String label = getPrettyLabelText(nodeDefinition);
+					result = result.replaceAll(nodeDefinition.getName(), label);
+				}
+			} catch (Exception e) {
+				throw new RuntimeException(e);
 			}
-		} catch (Exception e) {
-			throw new RuntimeException(e);
+			return result;
+		} else {
+			return expression;
 		}
-		return result;
 	}
 	
 	protected String getComparisonCheckMessage(Attribute<?,?> attribute, ValidationResult validationResult) {

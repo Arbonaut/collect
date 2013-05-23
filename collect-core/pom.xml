@@ -243,27 +243,6 @@
 										<ignore />
 									</action>
 								</pluginExecution>
-<!-- 								<pluginExecution> -->
-<!-- 									<pluginExecutionFilter> -->
-<!-- 										<groupId> -->
-<!-- 											org.codehaus.mojo -->
-<!-- 										</groupId> -->
-<!-- 										<artifactId> -->
-<!-- 											build-helper-maven-plugin -->
-<!-- 										</artifactId> -->
-<!-- 										<versionRange> -->
-<!-- 											[1.7,) -->
-<!-- 										</versionRange> -->
-<!-- 										<goals> -->
-<!-- 											<goal>add-source</goal> -->
-<!-- 											<goal>add-test-source</goal> -->
-<!-- 											<goal>add-test-resource</goal> -->
-<!-- 										</goals> -->
-<!-- 									</pluginExecutionFilter> -->
-<!-- 									<action> -->
-<!-- 										<ignore /> -->
-<!-- 									</action> -->
-<!-- 								</pluginExecution> -->
 							</pluginExecutions>
 						</lifecycleMappingMetadata>
 					</configuration>
@@ -284,7 +263,7 @@
 		<dependency>
 			<groupId>org.openforis.idm</groupId>
 			<artifactId>idm-api-protostuff</artifactId>
-			<version>3.0-Alpha6</version>
+			<version>3.0-CR1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.openforis.idm</groupId>
