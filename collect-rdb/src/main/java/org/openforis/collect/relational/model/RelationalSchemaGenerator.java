@@ -11,6 +11,7 @@ import org.openforis.idm.metamodel.AttributeDefinition;
 import org.openforis.idm.metamodel.CodeAttributeDefinition;
 import org.openforis.idm.metamodel.CodeList;
 import org.openforis.idm.metamodel.CodeListLevel;
+import org.openforis.idm.metamodel.CodeListService;
 import org.openforis.idm.metamodel.DateAttributeDefinition;
 import org.openforis.idm.metamodel.EntityDefinition;
 import org.openforis.idm.metamodel.FieldDefinition;
@@ -19,6 +20,7 @@ import org.openforis.idm.metamodel.NumberAttributeDefinition;
 import org.openforis.idm.metamodel.NumericAttributeDefinition;
 import org.openforis.idm.metamodel.Schema;
 import org.openforis.idm.metamodel.Survey;
+import org.openforis.idm.metamodel.SurveyContext;
 import org.openforis.idm.metamodel.TextAttributeDefinition;
 import org.openforis.idm.metamodel.TextAttributeDefinition.Type;
 import org.openforis.idm.metamodel.TimeAttributeDefinition;
@@ -281,9 +283,25 @@ public class RelationalSchemaGenerator {
 		if ( StringUtils.isBlank(list.getLookupTable()) ) {
 			addCodeValueFKColumn(rs, table, defn, relativePath);
 		}
-		if ( list.isQualifiable() ) {
-			addDataColumn(table, defn.getFieldDefinition(CodeAttributeDefinition.QUALIFIER_FIELD), relativePath);			
+		boolean qualifiable = isQualifiable(list);
+		if ( qualifiable ) {
+			addDataColumn(table, defn.getFieldDefinition(CodeAttributeDefinition.QUALIFIER_FIELD), relativePath);
 		}
+	}
+
+	protected boolean isQualifiable(CodeList list) {
+		boolean qualifiable = false;
+		if ( list.isExternal() ) {
+			return false;
+		} else if ( list.isEmpty() ) {
+			Survey survey = list.getSurvey();
+			SurveyContext context = survey.getContext();
+			CodeListService codeListService = context.getCodeListService();
+			qualifiable = codeListService.hasQualifiableItems(list);
+		} else {
+			qualifiable = list.isQualifiable();
+		}
+		return qualifiable;
 	}
 	
 	private void addDataColumns(DataTable table, NumericAttributeDefinition defn, Path relativePath) throws CollectRdbException {
